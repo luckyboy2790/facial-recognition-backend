@@ -4,6 +4,7 @@ const userRoute = require('./routes/user.route');
 const companyRoute = require('./routes/company.route');
 const departmentRoute = require('./routes/department.route');
 const jobTitileRoute = require('./routes/jobTitle.route');
+const leaveTypeRoute = require('./routes/leaveType.route');
 const { connectDB } = require('./config/connect');
 const path = require('path');
 const cors = require('cors');
@@ -36,6 +37,7 @@ app.use('/api/user', userRoute);
 app.use('/api/company', companyRoute);
 app.use('/api/department', departmentRoute);
 app.use('/api/job_title', jobTitileRoute);
+app.use('/api/leave_type', leaveTypeRoute);
 
 app.get('*', (req, res) => {
   res.status(404).send('404! This is an invalid URL.');
