@@ -59,6 +59,8 @@ exports.createEmployee = async (req, res) => {
     const hashedPin = await bcrypt.hash(pin, salt);
 
     const newEmployee = new EmployeeModel({
+      first_name: firstName,
+      last_name: lastName,
       full_name: `${firstName} ${lastName}`,
       email,
       dial_code: dialCode,
@@ -101,7 +103,6 @@ exports.getEmployee = async (req, res) => {
   try {
     console.log(req.query);
 
-    // Extract parameters
     const { pageIndex = 1, pageSize = 10, query = '', sort = {} } = req.query;
 
     const page = parseInt(pageIndex, 10);
@@ -264,6 +265,94 @@ exports.getEmployeeDetail = async (req, res) => {
     res.status(200).json({ message: 'Employee fetched successfully', data: employee[0] });
   } catch (error) {
     console.error('Error getting employee details:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.updateEmployee = async (req, res) => {
+  try {
+    console.log(req.body);
+
+    const {
+      firstName,
+      lastName,
+      email,
+      dialCode,
+      phoneNumber,
+      address,
+      gender,
+      civilStatus,
+      height,
+      weight,
+      age,
+      birthday,
+      nationalId,
+      placeOfBirth,
+      img,
+      company,
+      department,
+      jobTitle,
+      pin,
+      companyEmail,
+      leaveGroup,
+      employmentType,
+      employmentStatus,
+      officialStartDate,
+      dateRegularized,
+      faceDescriptor,
+      _id,
+    } = req.body;
+
+    if (!_id || !mongoose.Types.ObjectId.isValid(_id)) {
+      return res.status(400).json({ error: 'Invalid employee ID' });
+    }
+
+    let updateData = {
+      first_name: firstName,
+      last_name: lastName,
+      full_name: `${firstName} ${lastName}`,
+      email,
+      dial_code: dialCode,
+      phone_number: phoneNumber,
+      img,
+      address,
+      gender,
+      civil_status: civilStatus,
+      height,
+      weight,
+      age,
+      birthday,
+      national_id: nationalId,
+      place_of_birth: placeOfBirth,
+      company_id: company,
+      department_id: department,
+      job_title_id: jobTitle,
+      company_email: companyEmail,
+      leave_group_id: leaveGroup,
+      employee_type: employmentType,
+      employee_status: employmentStatus,
+      official_start_date: officialStartDate,
+      date_regularized: dateRegularized,
+      face_info: {
+        name: `${firstName} ${lastName}`,
+        descriptors: [faceDescriptor],
+      },
+    };
+
+    if (pin) {
+      const salt = await bcrypt.genSalt(10);
+      updateData.pin = await bcrypt.hash(pin, salt);
+    }
+
+    const updatedEmployee = await EmployeeModel.findByIdAndUpdate(_id, updateData, { new: true });
+
+    if (!updatedEmployee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    res.status(200).json({ message: 'Employee updated successfully', employee: updatedEmployee });
+  } catch (error) {
+    console.error('Error updating employee:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

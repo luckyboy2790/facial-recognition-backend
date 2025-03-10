@@ -5,6 +5,14 @@ const Schema = mongoose.Schema;
  * Employee Schema
  */
 const EmployeeSchema = new Schema({
+  first_name: {
+    type: String,
+    required: [true, 'First Name not provided'],
+  },
+  last_name: {
+    type: String,
+    required: [true, 'First Name not provided'],
+  },
   full_name: {
     type: String,
     required: [true, 'First Name not provided'],
@@ -108,7 +116,7 @@ const EmployeeSchema = new Schema({
   employee_status: {
     type: String,
     required: [true, 'Employee Status not provided'],
-    enum: ['Active', 'Archive'],
+    enum: ['Active', 'Archived'],
     default: 'Active',
   },
   official_start_date: {
