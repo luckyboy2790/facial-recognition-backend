@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const CompanyModel = require('../models/company.model');
 const DepartmentModel = require('../models/department.model');
 const JobTitleModel = require('../models/jobTitile.model');
@@ -53,9 +54,11 @@ exports.createEmployee = async (req, res) => {
       return res.status(400).json({ error: 'Face descriptor is invalid or missing' });
     }
 
+    const salt = await bcrypt.genSalt(10);
+    const hashedPin = await bcrypt.hash(pin, salt);
+
     const newEmployee = new EmployeeModel({
-      first_name: firstName,
-      last_name: lastName,
+      full_name: `${firstName} ${lastName}`,
       email,
       dial_code: dialCode,
       phone_number: phoneNumber,
@@ -72,7 +75,7 @@ exports.createEmployee = async (req, res) => {
       company_id: company,
       department_id: department,
       job_title_id: jobTitle,
-      pin,
+      pin: hashedPin,
       company_email: companyEmail,
       leave_group_id: leaveGroup,
       employee_type: employmentType,
@@ -89,6 +92,103 @@ exports.createEmployee = async (req, res) => {
     res.status(200).json({ message: 'Employee created successfully', employee: newEmployee });
   } catch (error) {
     console.error('Error creating employee:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.getEmployee = async (req, res) => {
+  try {
+    console.log(req.query);
+
+    // Extract parameters
+    const { pageIndex = 1, pageSize = 10, query = '', sort = {} } = req.query;
+
+    const page = parseInt(pageIndex, 10);
+    const limit = parseInt(pageSize, 10);
+    const skip = (page - 1) * limit;
+
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'companies',
+          localField: 'company_id',
+          foreignField: '_id',
+          as: 'company',
+        },
+      },
+      {
+        $lookup: {
+          from: 'departments',
+          localField: 'department_id',
+          foreignField: '_id',
+          as: 'department',
+        },
+      },
+      {
+        $lookup: {
+          from: 'job_titles',
+          localField: 'job_title_id',
+          foreignField: '_id',
+          as: 'job_title',
+        },
+      },
+      {
+        $lookup: {
+          from: 'leavegroups',
+          localField: 'leave_group_id',
+          foreignField: '_id',
+          as: 'leave_group',
+        },
+      },
+      {
+        $unwind: { path: '$company', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: '$department', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: '$job_title', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: '$leave_group', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $match: {
+          $or: [
+            { full_name: { $regex: query, $options: 'i' } },
+            { employee_status: { $regex: query, $options: 'i' } },
+            { 'company.company_name': { $regex: query, $options: 'i' } },
+            { 'department.department_name': { $regex: query, $options: 'i' } },
+            { 'job_title.job_title': { $regex: query, $options: 'i' } },
+            { 'leave_group.group_name': { $regex: query, $options: 'i' } },
+          ],
+        },
+      },
+      {
+        $sort: sort.key ? { [sort.key]: sort.order === 'asc' ? 1 : -1 } : { full_name: 1 }, // Default sorting by full_name
+      },
+      {
+        $facet: {
+          metadata: [{ $count: 'totalEmployees' }],
+          data: [{ $skip: skip }, { $limit: limit }],
+        },
+      },
+    ];
+
+    const result = await EmployeeModel.aggregate(pipeline);
+
+    const employees = result[0].data;
+    const totalEmployees = result[0].metadata.length > 0 ? result[0].metadata[0].totalEmployees : 0;
+
+    console.log(employees);
+
+    res.status(200).json({
+      message: 'Employees fetched successfully',
+      list: employees,
+      total: totalEmployees,
+    });
+  } catch (error) {
+    console.error('Error getting employees:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

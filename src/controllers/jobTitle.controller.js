@@ -90,7 +90,7 @@ exports.getJobTitle = async (req, res) => {
         },
       },
       {
-        $match: matchStage, // ✅ Same filter for counting total results
+        $match: matchStage,
       },
       {
         $count: 'total',

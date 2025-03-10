@@ -1,17 +1,28 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const router = express.Router();
 
+// Define the upload folder path one level up
+const uploadDir = path.join(__dirname, '../uploads');
+
+// Ensure the directory exists
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Configure Multer storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'src/', 'uploads/');
+    cb(null, uploadDir); // Store images in ../uploads
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}${path.extname(file.originalname)}`);
   },
 });
 
+// Multer middleware
 const upload = multer({ storage });
 
 router.post('/', upload.single('image'), (req, res) => {
