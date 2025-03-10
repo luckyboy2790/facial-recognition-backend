@@ -1,10 +1,10 @@
-const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const CompanyModel = require('../models/company.model');
 const DepartmentModel = require('../models/department.model');
 const JobTitleModel = require('../models/jobTitile.model');
 const LeaveGroupModel = require('../models/leaveGroup.model');
 const EmployeeModel = require('../models/employee.model');
+const { encrypt, decrypt } = require('../middlewares/cryptFunction');
 
 exports.getTotalFieldsData = async (req, res) => {
   try {
@@ -55,8 +55,7 @@ exports.createEmployee = async (req, res) => {
       return res.status(400).json({ error: 'Face descriptor is invalid or missing' });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPin = await bcrypt.hash(pin, salt);
+    const hashedPin = encrypt(pin);
 
     const newEmployee = new EmployeeModel({
       first_name: firstName,
@@ -254,15 +253,24 @@ exports.getEmployeeDetail = async (req, res) => {
       },
     ];
 
-    const employee = await EmployeeModel.aggregate(pipeline);
+    const employeeData = await EmployeeModel.aggregate(pipeline);
 
-    console.log(employee);
-
-    if (!employee || employee.length === 0) {
+    if (!employeeData || employeeData.length === 0) {
       return res.status(404).json({ error: 'Employee not found' });
     }
 
-    res.status(200).json({ message: 'Employee fetched successfully', data: employee[0] });
+    const employee = employeeData[0];
+
+    if (employee.pin) {
+      try {
+        employee.pin = decrypt(employee.pin);
+      } catch (err) {
+        console.error('Error decrypting PIN:', err);
+        employee.pin = null;
+      }
+    }
+
+    res.status(200).json({ message: 'Employee fetched successfully', data: employee });
   } catch (error) {
     console.error('Error getting employee details:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -307,6 +315,8 @@ exports.updateEmployee = async (req, res) => {
       return res.status(400).json({ error: 'Invalid employee ID' });
     }
 
+    console.log(pin);
+
     let updateData = {
       first_name: firstName,
       last_name: lastName,
@@ -337,12 +347,8 @@ exports.updateEmployee = async (req, res) => {
         name: `${firstName} ${lastName}`,
         descriptors: [faceDescriptor],
       },
+      pin: encrypt(pin),
     };
-
-    if (pin) {
-      const salt = await bcrypt.genSalt(10);
-      updateData.pin = await bcrypt.hash(pin, salt);
-    }
 
     const updatedEmployee = await EmployeeModel.findByIdAndUpdate(_id, updateData, { new: true });
 
@@ -374,5 +380,34 @@ exports.deleteEmployee = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+exports.archiveEmployee = async (req, res) => {
+  try {
+    const { employeeId } = req.body;
+
+    if (!employeeId) {
+      return res.status(400).json({ error: 'Employee ID is required' });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+      return res.status(400).json({ error: 'Invalid Employee ID' });
+    }
+
+    const employee = await EmployeeModel.findByIdAndUpdate(
+      employeeId,
+      { employee_status: 'Archived' },
+      { new: true, runValidators: true },
+    );
+
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    res.status(200).json({ employee });
+  } catch (error) {
+    console.error('Error archiving employee:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

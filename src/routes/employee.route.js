@@ -7,6 +7,7 @@ const {
   getEmployeeDetail,
   updateEmployee,
   deleteEmployee,
+  archiveEmployee,
 } = require('../controllers/employee.controller');
 
 router.get('/total_field', getTotalFieldsData);
@@ -15,5 +16,6 @@ router.get('/', getEmployee);
 router.get('/:id', getEmployeeDetail);
 router.post('/update_employee', updateEmployee);
 router.post('/delete_employee', deleteEmployee);
+router.post('/archive_employee', archiveEmployee);
 
 module.exports = router;
