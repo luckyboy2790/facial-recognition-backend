@@ -356,3 +356,23 @@ exports.updateEmployee = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+exports.deleteEmployee = async (req, res) => {
+  try {
+    console.log(req.body);
+    const data = req.body;
+
+    for (let id of data.employeeIds) {
+      const employee_id = await EmployeeModel.findByIdAndDelete(id);
+
+      if (!employee_id) {
+        throw new Error('Delete failed');
+      }
+    }
+
+    res.json({ message: 'Delete Successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
