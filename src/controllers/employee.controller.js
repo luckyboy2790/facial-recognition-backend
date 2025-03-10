@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
 const CompanyModel = require('../models/company.model');
 const DepartmentModel = require('../models/department.model');
 const JobTitleModel = require('../models/jobTitile.model');
@@ -165,7 +166,7 @@ exports.getEmployee = async (req, res) => {
         },
       },
       {
-        $sort: sort.key ? { [sort.key]: sort.order === 'asc' ? 1 : -1 } : { full_name: 1 }, // Default sorting by full_name
+        $sort: sort.key ? { [sort.key]: sort.order === 'asc' ? 1 : -1 } : { full_name: 1 },
       },
       {
         $facet: {
@@ -189,6 +190,80 @@ exports.getEmployee = async (req, res) => {
     });
   } catch (error) {
     console.error('Error getting employees:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.getEmployeeDetail = async (req, res) => {
+  try {
+    console.log(req.params);
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid employee ID' });
+    }
+
+    const pipeline = [
+      {
+        $match: { _id: new mongoose.Types.ObjectId(id) },
+      },
+      {
+        $lookup: {
+          from: 'companies',
+          localField: 'company_id',
+          foreignField: '_id',
+          as: 'company',
+        },
+      },
+      {
+        $lookup: {
+          from: 'departments',
+          localField: 'department_id',
+          foreignField: '_id',
+          as: 'department',
+        },
+      },
+      {
+        $lookup: {
+          from: 'job_titles',
+          localField: 'job_title_id',
+          foreignField: '_id',
+          as: 'job_title',
+        },
+      },
+      {
+        $lookup: {
+          from: 'leavegroups',
+          localField: 'leave_group_id',
+          foreignField: '_id',
+          as: 'leave_group',
+        },
+      },
+      {
+        $unwind: { path: '$company', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: '$department', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: '$job_title', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: '$leave_group', preserveNullAndEmptyArrays: true },
+      },
+    ];
+
+    const employee = await EmployeeModel.aggregate(pipeline);
+
+    console.log(employee);
+
+    if (!employee || employee.length === 0) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    res.status(200).json({ message: 'Employee fetched successfully', data: employee[0] });
+  } catch (error) {
+    console.error('Error getting employee details:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
