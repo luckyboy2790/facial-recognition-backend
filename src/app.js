@@ -1,11 +1,16 @@
 const express = require('express');
 const app = express();
+
 const userRoute = require('./routes/user.route');
 const companyRoute = require('./routes/company.route');
 const departmentRoute = require('./routes/department.route');
 const jobTitileRoute = require('./routes/jobTitle.route');
 const leaveTypeRoute = require('./routes/leaveType.route');
 const leaveGroupRoute = require('./routes/leaveGroup.route');
+
+const employeeRoute = require('./routes/employee.route');
+const uploadRoutes = require('./routes/uploadRoutes');
+
 const { connectDB } = require('./config/connect');
 const path = require('path');
 const cors = require('cors');
@@ -40,6 +45,9 @@ app.use('/api/department', departmentRoute);
 app.use('/api/job_title', jobTitileRoute);
 app.use('/api/leave_type', leaveTypeRoute);
 app.use('/api/leave_group', leaveGroupRoute);
+
+app.use('/api/employee', employeeRoute);
+app.use('/api/upload-image', uploadRoutes);
 
 app.get('*', (req, res) => {
   res.status(404).send('404! This is an invalid URL.');

@@ -1,5 +1,4 @@
 const JobTitleModel = require('../models/jobTitile.model');
-const DepartmentModel = require('../models/department.model');
 
 exports.createJobTitle = async (req, res) => {
   try {
