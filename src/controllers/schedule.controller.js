@@ -1,5 +1,6 @@
 const { convertTo12HourFormat, formatDate } = require('../helper/employeeScheduleHelper');
 const ScheduleModel = require('../models/schedule.model');
+const mongoose = require('mongoose');
 
 exports.createSchedule = async (req, res) => {
   try {
@@ -163,5 +164,34 @@ exports.deleteSchedule = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+exports.archiveSchedule = async (req, res) => {
+  try {
+    const { scheduleId } = req.body;
+
+    if (!scheduleId) {
+      return res.status(400).json({ error: 'Schedule ID is required' });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(scheduleId)) {
+      return res.status(400).json({ error: 'Invalid Schedule ID' });
+    }
+
+    const schedule = await ScheduleModel.findByIdAndUpdate(
+      scheduleId,
+      { status: 'Previous' },
+      { new: true, runValidators: true },
+    );
+
+    if (!schedule) {
+      return res.status(404).json({ error: 'Schedule not found' });
+    }
+
+    res.status(200).json({ schedule });
+  } catch (error) {
+    console.error('Error archiving schedule:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
