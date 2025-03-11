@@ -100,8 +100,6 @@ exports.createEmployee = async (req, res) => {
 
 exports.getEmployee = async (req, res) => {
   try {
-    console.log(req.query);
-
     const { pageIndex = 1, pageSize = 10, query = '', sort = {} } = req.query;
 
     const page = parseInt(pageIndex, 10);
@@ -181,8 +179,6 @@ exports.getEmployee = async (req, res) => {
     const employees = result[0].data;
     const totalEmployees = result[0].metadata.length > 0 ? result[0].metadata[0].totalEmployees : 0;
 
-    console.log(employees);
-
     res.status(200).json({
       message: 'Employees fetched successfully',
       list: employees,
@@ -196,7 +192,6 @@ exports.getEmployee = async (req, res) => {
 
 exports.getEmployeeDetail = async (req, res) => {
   try {
-    console.log(req.params);
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -279,8 +274,6 @@ exports.getEmployeeDetail = async (req, res) => {
 
 exports.updateEmployee = async (req, res) => {
   try {
-    console.log(req.body);
-
     const {
       firstName,
       lastName,
@@ -314,8 +307,6 @@ exports.updateEmployee = async (req, res) => {
     if (!_id || !mongoose.Types.ObjectId.isValid(_id)) {
       return res.status(400).json({ error: 'Invalid employee ID' });
     }
-
-    console.log(pin);
 
     let updateData = {
       first_name: firstName,
@@ -365,7 +356,6 @@ exports.updateEmployee = async (req, res) => {
 
 exports.deleteEmployee = async (req, res) => {
   try {
-    console.log(req.body);
     const data = req.body;
 
     for (let id of data.employeeIds) {
@@ -409,5 +399,20 @@ exports.archiveEmployee = async (req, res) => {
   } catch (error) {
     console.error('Error archiving employee:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.getTotalEmployee = async (req, res) => {
+  console.log(123456789);
+  try {
+    const employeeData = await EmployeeModel.find({});
+
+    console.log(employeeData);
+
+    res.json({ employeeData });
+  } catch (error) {
+    console.log(error);
+
+    res.status(200).json({ error: error.message });
   }
 };
