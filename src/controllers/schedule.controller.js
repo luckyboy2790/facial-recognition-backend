@@ -8,6 +8,16 @@ exports.createSchedule = async (req, res) => {
 
     const { employee, start_time, off_time, from, to, total_hours, rest_days } = req.body;
 
+    const existEmployee = await ScheduleModel.findOne({ employee: employee, status: 'Present' });
+
+    if (existEmployee) {
+      res.status(400).json({
+        message: "You can't create schedule for this employee because he has active schedule.",
+      });
+
+      return;
+    }
+
     const newSchedule = new ScheduleModel({
       employee,
       start_time,
