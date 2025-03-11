@@ -100,3 +100,107 @@ exports.createAttendance = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.getAttendance = async (req, res) => {
+  try {
+    console.log(req.query);
+
+    const { pageIndex = '1', pageSize = '10', query = '', sort = {} } = req.query;
+
+    const page = parseInt(pageIndex, 10);
+    const limit = parseInt(pageSize, 10);
+    const skip = (page - 1) * limit;
+
+    let dateFilter = {};
+
+    if (query !== '') {
+      try {
+        const parsedDates = JSON.parse(query);
+        if (Array.isArray(parsedDates) && parsedDates.length === 2) {
+          const [startDate, endDate] = parsedDates.map((date) => moment(date).format('YYYY-MM-DD'));
+          dateFilter = { date: { $gte: startDate, $lte: endDate } };
+        }
+      } catch (error) {
+        console.error('Invalid query format:', error);
+        return res.status(400).json({ message: 'Invalid date query format' });
+      }
+    }
+
+    const pipeline = [
+      {
+        $match: dateFilter,
+      },
+      {
+        $lookup: {
+          from: 'employees',
+          localField: 'employee',
+          foreignField: '_id',
+          as: 'employeeData',
+        },
+      },
+      {
+        $unwind: { path: '$employeeData', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 1,
+          employee: 1,
+          date: 1,
+          total_hours: 1,
+          status_timein: 1,
+          status_timeout: 1,
+          reason: 1,
+          comment: 1,
+          'employeeData.full_name': 1,
+          time_in_24: {
+            $cond: {
+              if: { $or: [{ $eq: ['$time_in', ''] }, { $not: ['$time_in'] }] },
+              then: null,
+              else: { $dateToString: { format: '%H:%M:%S', date: { $toDate: '$time_in' } } },
+            },
+          },
+          time_out_24: {
+            $cond: {
+              if: { $or: [{ $eq: ['$time_out', ''] }, { $not: ['$time_out'] }] },
+              then: null,
+              else: { $dateToString: { format: '%H:%M:%S', date: { $toDate: '$time_out' } } },
+            },
+          },
+        },
+      },
+      {
+        $sort: sort.key ? { [sort.key]: sort.order === 'asc' ? 1 : -1 } : { date: -1 },
+      },
+      {
+        $facet: {
+          metadata: [{ $count: 'totalRecords' }],
+          data: [{ $skip: skip }, { $limit: limit }],
+        },
+      },
+    ];
+
+    let result = await AttendanceModel.aggregate(pipeline);
+
+    let attendanceRecords = result[0].data;
+    const totalRecords = result[0].metadata.length > 0 ? result[0].metadata[0].totalRecords : 0;
+
+    attendanceRecords = attendanceRecords.map((record) => ({
+      ...record,
+      time_in: record.time_in_24
+        ? moment(record.time_in_24, 'HH:mm:ss').format('hh:mm:ss A')
+        : null,
+      time_out: record.time_out_24
+        ? moment(record.time_out_24, 'HH:mm:ss').format('hh:mm:ss A')
+        : null,
+    }));
+
+    res.status(200).json({
+      message: 'Attendance records fetched successfully',
+      list: attendanceRecords,
+      total: totalRecords,
+    });
+  } catch (error) {
+    console.error('Error getting attendance records:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
