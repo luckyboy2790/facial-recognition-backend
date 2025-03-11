@@ -103,3 +103,65 @@ exports.getSchedule = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+exports.getScheduleDetail = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log(id);
+
+    const schedule = await ScheduleModel.findById(id);
+
+    res.status(200).json({
+      message: 'Schedule detail fetched successfully',
+      schedule,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(200).json({ error: error.message });
+  }
+};
+
+exports.updateScheduleDetail = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { employee, start_time, off_time, from, to, total_hours, rest_days } = req.body;
+
+    console.log(req.body);
+
+    const scheduleId = await ScheduleModel.findByIdAndUpdate(id, {
+      employee,
+      start_time,
+      off_time,
+      from,
+      to,
+      total_hours,
+      rest_days,
+    });
+
+    res.status(200).json({ message: 'Schedule created successfully', schedule: scheduleId });
+  } catch (error) {
+    console.error(error);
+    res.status(200).json({ error: error.message });
+  }
+};
+
+exports.deleteSchedule = async (req, res) => {
+  try {
+    const data = req.body;
+
+    for (let id of data.scheduleIds) {
+      const schedule_id = await ScheduleModel.findByIdAndDelete(id);
+
+      if (!schedule_id) {
+        throw new Error('Delete failed');
+      }
+    }
+
+    res.json({ message: 'Delete Successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
