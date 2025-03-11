@@ -13,6 +13,12 @@ const scheduleModel = new Schema({
     type: String,
     required: [true, 'From Date not provided'],
   },
+  status: {
+    type: String,
+    required: [true, 'Status not provided'],
+    enum: ['Present', 'Previous'],
+    default: 'Present',
+  },
   to: {
     type: String,
     required: [true, 'To Date not provided'],
