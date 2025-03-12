@@ -84,14 +84,19 @@ exports.createEmployee = async (req, res) => {
       employee_status: employmentStatus,
       official_start_date: officialStartDate,
       date_regularized: dateRegularized,
-      face_info: {
-        name: `${firstName} ${lastName}`,
-        descriptors: [faceDescriptor],
-      },
     });
 
-    await newEmployee.save();
-    res.status(200).json({ message: 'Employee created successfully', employee: newEmployee });
+    const savedEmployee = await newEmployee.save();
+
+    savedEmployee.face_info = {
+      name: `${savedEmployee._id}`,
+      descriptors: [faceDescriptor],
+    };
+
+    // Save the updated employee document
+    await savedEmployee.save();
+
+    res.status(200).json({ message: 'Employee created successfully', employee: savedEmployee });
   } catch (error) {
     console.error('Error creating employee:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -414,5 +419,29 @@ exports.getTotalEmployee = async (req, res) => {
     console.log(error);
 
     res.status(200).json({ error: error.message });
+  }
+};
+
+exports.getTotalEmployeeFaceInfo = async (req, res) => {
+  try {
+    const employees = await EmployeeModel.find({
+      'face_info.descriptors': { $exists: true, $ne: [] },
+    });
+
+    const faceInfoData = {};
+
+    employees.forEach((employee) => {
+      if (employee.face_info && employee.face_info.descriptors.length > 0) {
+        faceInfoData[employee.full_name] = {
+          name: employee.face_info.name,
+          descriptors: employee.face_info.descriptors,
+        };
+      }
+    });
+
+    res.status(200).json(faceInfoData);
+  } catch (error) {
+    console.error('Error fetching employee face info:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

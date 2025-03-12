@@ -34,9 +34,6 @@ const attendanceModel = new Schema({
   reason: {
     type: String,
   },
-  comment: {
-    type: String,
-  },
 });
 
 module.exports = mongoose.model('employeeAttendance', attendanceModel);

@@ -357,3 +357,24 @@ exports.deleteAttendance = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.checkOutAttendance = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const now = new Date();
+
+    const date = now.toISOString().split('T')[0];
+
+    const attendanceData = await AttendanceModel.findOne({ employee: id, date });
+
+    if (attendanceData.length <= 0) {
+      res.status(400).send({ message: 'There is no attendance data for this employee.' });
+    }
+
+    res.status(200).send(attendanceData);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};

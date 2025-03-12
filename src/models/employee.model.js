@@ -37,11 +37,9 @@ const EmployeeSchema = new Schema({
   face_info: {
     name: {
       type: String,
-      required: [true, 'Face name not provided'],
     },
     descriptors: {
-      type: [[Number]], // Array of arrays containing numbers
-      required: [true, 'Face descriptors not provided'],
+      type: [[Number]],
     },
   },
   address: {
