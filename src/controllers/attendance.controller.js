@@ -338,3 +338,22 @@ exports.updateAttendance = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.deleteAttendance = async (req, res) => {
+  try {
+    const data = req.body;
+
+    for (let id of data.attendanceIds) {
+      const schedule_id = await AttendanceModel.findByIdAndDelete(id);
+
+      if (!schedule_id) {
+        throw new Error('Delete failed');
+      }
+    }
+
+    res.json({ message: 'Delete Successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
