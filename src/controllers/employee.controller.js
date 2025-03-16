@@ -408,9 +408,55 @@ exports.archiveEmployee = async (req, res) => {
 };
 
 exports.getTotalEmployee = async (req, res) => {
-  console.log(123456789);
   try {
-    const employeeData = await EmployeeModel.find({});
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'companies',
+          localField: 'company_id',
+          foreignField: '_id',
+          as: 'company',
+        },
+      },
+      {
+        $lookup: {
+          from: 'departments',
+          localField: 'department_id',
+          foreignField: '_id',
+          as: 'department',
+        },
+      },
+      {
+        $lookup: {
+          from: 'job_titles',
+          localField: 'job_title_id',
+          foreignField: '_id',
+          as: 'job_title',
+        },
+      },
+      {
+        $lookup: {
+          from: 'leavegroups',
+          localField: 'leave_group_id',
+          foreignField: '_id',
+          as: 'leave_group',
+        },
+      },
+      {
+        $unwind: { path: '$company', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: '$department', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: '$job_title', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: '$leave_group', preserveNullAndEmptyArrays: true },
+      },
+    ];
+
+    const employeeData = await EmployeeModel.aggregate(pipeline);
 
     console.log(employeeData);
 
