@@ -1,7 +1,6 @@
 const UserRoleModel = require('../models/role.model');
 const UserModel = require('../models/user.model');
 const bcrypt = require('bcryptjs');
-const mongoose = require('mongoose');
 
 exports.createRole = async (req, res) => {
   try {
@@ -76,6 +75,11 @@ exports.deleteRole = async (req, res) => {
 exports.createUser = async (req, res) => {
   try {
     const { employee, email, status, account_type, role, password } = req.body;
+
+    const existEmployee = UserRoleModel.findOne({ employee: employee });
+    if (existEmployee) {
+      return res.status(500).json({ message: 'Employee exist!' });
+    }
 
     const newUser = new UserModel({
       employee,
