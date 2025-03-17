@@ -15,6 +15,8 @@ const scheduleRoutes = require('./routes/schedule.route');
 
 const attendanceRoutes = require('./routes/attendance.route');
 
+const settingRoutes = require('./routes/setting.route');
+
 const { connectDB } = require('./config/connect');
 const path = require('path');
 const cors = require('cors');
@@ -58,6 +60,8 @@ app.use('/api/upload-image', uploadRoutes);
 app.use('/api/schedule', scheduleRoutes);
 
 app.use('/api/attendance', attendanceRoutes);
+
+app.use('/api/setting', settingRoutes);
 
 app.get('*', (req, res) => {
   res.status(404).send('404! This is an invalid URL.');
