@@ -33,9 +33,6 @@ app.use(
     extended: true,
   }),
 );
-
-createInitialUserData();
-
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use((req, res, next) => {
