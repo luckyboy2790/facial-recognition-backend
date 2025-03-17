@@ -205,3 +205,22 @@ exports.updateUserData = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const data = req.body;
+
+    for (let id of data.userIds) {
+      const user_id = await UserModel.findByIdAndDelete(id);
+
+      if (!user_id) {
+        throw new Error('Delete failed');
+      }
+    }
+
+    res.json({ message: 'Delete Successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
