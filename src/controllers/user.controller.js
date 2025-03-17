@@ -93,3 +93,72 @@ exports.createUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.getUsers = async (req, res) => {
+  try {
+    const { pageIndex = 1, pageSize = 10, query = '', sort = {} } = req.query;
+
+    const page = parseInt(pageIndex, 10);
+    const limit = parseInt(pageSize, 10);
+    const skip = (page - 1) * limit;
+
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'employees',
+          localField: 'employee',
+          foreignField: '_id',
+          as: 'employeeData',
+        },
+      },
+      {
+        $lookup: {
+          from: 'userroles',
+          localField: 'role',
+          foreignField: '_id',
+          as: 'roleData',
+        },
+      },
+      {
+        $unwind: { path: '$employeeData', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: '$roleData', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $match: {
+          $or: [
+            { email: { $regex: query, $options: 'i' } },
+            { account_type: { $regex: query, $options: 'i' } },
+            { status: { $regex: query, $options: 'i' } },
+            { 'employeeData.full_name': { $regex: query, $options: 'i' } },
+            { 'roleData.name': { $regex: query, $options: 'i' } },
+          ],
+        },
+      },
+      {
+        $sort: sort.key ? { [sort.key]: sort.order === 'asc' ? 1 : -1 } : { full_name: 1 },
+      },
+      {
+        $facet: {
+          metadata: [{ $count: 'totalEmployees' }],
+          data: [{ $skip: skip }, { $limit: limit }],
+        },
+      },
+    ];
+
+    const result = await UserModel.aggregate(pipeline);
+
+    const users = result[0].data;
+    const totalUsers = result[0].metadata.length > 0 ? result[0].metadata[0].totalEmployees : 0;
+
+    res.status(200).json({
+      message: 'Employees fetched successfully',
+      list: users,
+      total: totalUsers,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};

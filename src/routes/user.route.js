@@ -7,6 +7,7 @@ const {
   updateRole,
   deleteRole,
   createUser,
+  getUsers,
 } = require('../controllers/user.controller.js');
 
 router.post('/register', signup);
@@ -18,4 +19,6 @@ router.post('/update_role/:id', updateRole);
 router.post('/delete_role/:id', deleteRole);
 
 router.post('/create_user', createUser);
+router.get('/get_users', getUsers);
+
 module.exports = router;
