@@ -4,12 +4,12 @@ const Schema = mongoose.Schema;
 /**
  * User Schema
  */
-const userPermissionSchema = new Schema({
-  role_name: {
+const userRoleSchema = new Schema({
+  name: {
     type: String,
     required: [true, 'Role Name not provided'],
   },
-  role_status: {
+  status: {
     type: String,
     required: [true, 'Role Status not provided'],
   },
@@ -20,4 +20,4 @@ const userPermissionSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model('UserPermission', userPermissionSchema);
+module.exports = mongoose.model('UserRole', userRoleSchema);
