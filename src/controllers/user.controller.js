@@ -56,3 +56,16 @@ exports.updateRole = async (req, res) => {
     res.status(500).json({ message: error });
   }
 };
+
+exports.deleteRole = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await UserRoleModel.findByIdAndDelete(id);
+
+    res.status(200).json({ message: 'Delete successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
