@@ -8,6 +8,8 @@ const {
   deleteRole,
   createUser,
   getUsers,
+  getUserDetail,
+  updateUserData,
 } = require('../controllers/user.controller.js');
 
 router.post('/register', signup);
@@ -20,5 +22,7 @@ router.post('/delete_role/:id', deleteRole);
 
 router.post('/create_user', createUser);
 router.get('/get_users', getUsers);
+router.get('/get_user/:id', getUserDetail);
+router.post('/update_user/:id', updateUserData);
 
 module.exports = router;

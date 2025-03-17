@@ -1,6 +1,7 @@
 const UserRoleModel = require('../models/role.model');
 const UserModel = require('../models/user.model');
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
 
 exports.createRole = async (req, res) => {
   try {
@@ -157,6 +158,48 @@ exports.getUsers = async (req, res) => {
       list: users,
       total: totalUsers,
     });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getUserDetail = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const userDetail = await UserModel.findById(id);
+
+    res.status(200).json({ message: 'Fetch Data successfully', userDetail });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.updateUserData = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { employee, email, status, account_type, role, password } = req.body;
+
+    const updateData = {
+      employee,
+      email,
+      status,
+      account_type,
+      role,
+    };
+
+    if (password) {
+      updateData.password = bcrypt.hashSync(password, 8);
+    }
+
+    await UserModel.findByIdAndUpdate(id, updateData, { new: true });
+
+    console.log(req.body);
+
+    res.status(200).json({ message: 'Update Successfully' });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
