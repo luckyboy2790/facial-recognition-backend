@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
+const Employee = require('../models/employee.model');
 
 const verifyToken = async (req, res, next) => {
   try {
@@ -13,7 +14,26 @@ const verifyToken = async (req, res, next) => {
         return res.status(404).send({ message: 'User not found' });
       }
 
-      req.user = user;
+      const userWithEmployeeData = await User.aggregate([
+        { $match: { email: decoded.id } },
+        {
+          $lookup: {
+            from: 'employees',
+            localField: 'employee',
+            foreignField: '_id',
+            as: 'employeeData',
+          },
+        },
+        {
+          $unwind: {
+            path: '$employeeData',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+      ]);
+
+      req.user = userWithEmployeeData[0];
+
       next();
     } else {
       req.user = undefined;
