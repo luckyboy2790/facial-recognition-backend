@@ -28,6 +28,8 @@ connectDB();
 
 app.set('trust proxy', true);
 
+createInitialUserData();
+
 app.use(cors({}));
 app.use(express.json());
 app.use(

@@ -1,17 +1,17 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user.model');
+const EmployeeModel = require('../models/employee.model');
 
 exports.signup = (req, res) => {
-  const { firstName, lastName, email, role, password, homeAddress, phoneNumber } = req.body;
+  const { employee, email, status, account_type, role, password } = req.body;
   const user = new User({
-    firstName,
-    lastName,
+    employee,
     email,
+    status,
+    account_type,
     role,
     password: bcrypt.hashSync(password, 8),
-    homeAddress,
-    phoneNumber,
   });
 
   user
@@ -34,7 +34,7 @@ exports.signin = (req, res) => {
     email: req.body.email,
   })
     .exec()
-    .then((user) => {
+    .then(async (user) => {
       if (!user) {
         return res.status(404).send({
           message: 'User Not found.',
@@ -54,7 +54,7 @@ exports.signin = (req, res) => {
 
       var token = jwt.sign(
         {
-          id: user.id,
+          id: user.email,
         },
         process.env.API_SECRET,
         {
@@ -64,11 +64,13 @@ exports.signin = (req, res) => {
 
       const expiresAt = new Date(Date.now() + expiresIn * 1000);
 
+      const employeeData = await EmployeeModel.findById(user.employee);
+
       res.status(200).send({
         user: {
-          id: user._id,
+          _id: user._id,
           email: user.email,
-          fullName: user.fullName,
+          full_name: employeeData?.full_name,
         },
         message: 'Login successfull',
         accessToken: token,
