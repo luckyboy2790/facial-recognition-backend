@@ -6,10 +6,11 @@ const {
   deleteLeaveGroup,
   updateLeaveGroup,
 } = require('../controllers/leaveGroup.controller');
+const verifyToken = require('../middlewares/authJWT');
 
-router.post('/create', createLeaveGroup);
-router.get('/', getLeaveGroup);
-router.post('/update', updateLeaveGroup);
-router.post('/delete', deleteLeaveGroup);
+router.post('/create', verifyToken, createLeaveGroup);
+router.get('/', verifyToken, getLeaveGroup);
+router.post('/update', verifyToken, updateLeaveGroup);
+router.post('/delete', verifyToken, deleteLeaveGroup);
 
 module.exports = router;

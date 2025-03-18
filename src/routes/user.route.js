@@ -12,19 +12,20 @@ const {
   updateUserData,
   deleteUser,
 } = require('../controllers/user.controller.js');
+const verifyToken = require('../middlewares/authJWT');
 
 router.post('/register', signup);
 router.post('/login', signin);
 
-router.post('/create_role', createRole);
-router.get('/get_role', getRole);
-router.post('/update_role/:id', updateRole);
-router.post('/delete_role/:id', deleteRole);
+router.post('/create_role', verifyToken, createRole);
+router.get('/get_role', verifyToken, getRole);
+router.post('/update_role/:id', verifyToken, updateRole);
+router.post('/delete_role/:id', verifyToken, deleteRole);
 
-router.post('/create_user', createUser);
-router.get('/get_users', getUsers);
-router.get('/get_user/:id', getUserDetail);
-router.post('/update_user/:id', updateUserData);
-router.post('/delete_user', deleteUser);
+router.post('/create_user', verifyToken, createUser);
+router.get('/get_users', verifyToken, getUsers);
+router.get('/get_user/:id', verifyToken, getUserDetail);
+router.post('/update_user/:id', verifyToken, updateUserData);
+router.post('/delete_user', verifyToken, deleteUser);
 
 module.exports = router;

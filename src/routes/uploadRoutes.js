@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const router = express.Router();
+const verifyToken = require('../middlewares/authJWT');
 
 // Define the upload folder path one level up
 const uploadDir = path.join(__dirname, '../uploads');
@@ -25,7 +26,7 @@ const storage = multer.diskStorage({
 // Multer middleware
 const upload = multer({ storage });
 
-router.post('/', upload.single('image'), (req, res) => {
+router.post('/', verifyToken, upload.single('image'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ success: false, message: 'No file uploaded' });
   }

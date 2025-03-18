@@ -4,6 +4,7 @@ const DepartmentModel = require('../models/department.model');
 const JobTitleModel = require('../models/jobTitile.model');
 const LeaveGroupModel = require('../models/leaveGroup.model');
 const EmployeeModel = require('../models/employee.model');
+const UserModel = require('../models/user.model');
 const { encrypt, decrypt } = require('../middlewares/cryptFunction');
 
 exports.getTotalFieldsData = async (req, res) => {
@@ -107,6 +108,8 @@ exports.getEmployee = async (req, res) => {
   try {
     const { pageIndex = 1, pageSize = 10, query = '', sort = {} } = req.query;
 
+    const loggedInEmployeeId = req.user.employee;
+
     const page = parseInt(pageIndex, 10);
     const limit = parseInt(pageSize, 10);
     const skip = (page - 1) * limit;
@@ -158,6 +161,7 @@ exports.getEmployee = async (req, res) => {
       },
       {
         $match: {
+          _id: { $ne: loggedInEmployeeId },
           $or: [
             { full_name: { $regex: query, $options: 'i' } },
             { employee_status: { $regex: query, $options: 'i' } },
@@ -198,6 +202,8 @@ exports.getEmployee = async (req, res) => {
 exports.getEmployeeDetail = async (req, res) => {
   try {
     const { id } = req.params;
+
+    const loggedInEmployeeId = req.user.employee;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ error: 'Invalid employee ID' });
@@ -250,6 +256,11 @@ exports.getEmployeeDetail = async (req, res) => {
       },
       {
         $unwind: { path: '$leave_group', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $match: {
+          _id: { $ne: loggedInEmployeeId },
+        },
       },
     ];
 
@@ -352,6 +363,14 @@ exports.updateEmployee = async (req, res) => {
       return res.status(404).json({ error: 'Employee not found' });
     }
 
+    const userData = await UserModel.findOne({ employee: _id });
+
+    if (userData) {
+      userData.email = email;
+
+      await userData.save();
+    }
+
     res.status(200).json({ message: 'Employee updated successfully', employee: updatedEmployee });
   } catch (error) {
     console.error('Error updating employee:', error);
@@ -409,6 +428,10 @@ exports.archiveEmployee = async (req, res) => {
 
 exports.getTotalEmployee = async (req, res) => {
   try {
+    console.log(req.user);
+
+    const loggedInEmployeeId = req.user.employee;
+
     const pipeline = [
       {
         $lookup: {
@@ -453,6 +476,11 @@ exports.getTotalEmployee = async (req, res) => {
       },
       {
         $unwind: { path: '$leave_group', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $match: {
+          _id: { $ne: loggedInEmployeeId },
+        },
       },
     ];
 

@@ -9,11 +9,13 @@ const {
   checkOutAttendance,
 } = require('../controllers/attendance.controller');
 
-router.post('/create_attendance', createAttendance);
-router.get('/get_attendance', getAttendance);
-router.get('/get_attendance/:id', getAttendanceDetail);
-router.post('/update_attendance/:id', updateAttendance);
-router.post('/delete_attendance', deleteAttendance);
-router.get('/checkout_attendance/:id', checkOutAttendance);
+const verifyToken = require('../middlewares/authJWT');
+
+router.post('/create_attendance', verifyToken, createAttendance);
+router.get('/get_attendance', verifyToken, getAttendance);
+router.get('/get_attendance/:id', verifyToken, getAttendanceDetail);
+router.post('/update_attendance/:id', verifyToken, updateAttendance);
+router.post('/delete_attendance', verifyToken, deleteAttendance);
+router.get('/checkout_attendance/:id', verifyToken, checkOutAttendance);
 
 module.exports = router;

@@ -2,8 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { createCompany, getCompany, deleteCompany } = require('../controllers/company.controller');
 
-router.post('/create', createCompany);
-router.get('/', getCompany);
-router.post('/delete', deleteCompany);
+const verifyToken = require('../middlewares/authJWT');
+
+router.post('/create', verifyToken, createCompany);
+router.get('/', verifyToken, getCompany);
+router.post('/delete', verifyToken, deleteCompany);
 
 module.exports = router;

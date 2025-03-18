@@ -8,12 +8,13 @@ const {
   deleteSchedule,
   archiveSchedule,
 } = require('../controllers/schedule.controller');
+const verifyToken = require('../middlewares/authJWT');
 
-router.post('/create_schedule', createSchedule);
-router.get('/get_schedule', getSchedule);
-router.get('/get_schedule/:id', getScheduleDetail);
-router.post('/update_schedule/:id', updateScheduleDetail);
-router.post('/delete_schedule', deleteSchedule);
-router.post('/archive_schedule', archiveSchedule);
+router.post('/create_schedule', verifyToken, createSchedule);
+router.get('/get_schedule', verifyToken, getSchedule);
+router.get('/get_schedule/:id', verifyToken, getScheduleDetail);
+router.post('/update_schedule/:id', verifyToken, updateScheduleDetail);
+router.post('/delete_schedule', verifyToken, deleteSchedule);
+router.post('/archive_schedule', verifyToken, archiveSchedule);
 
 module.exports = router;

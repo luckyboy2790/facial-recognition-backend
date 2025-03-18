@@ -6,8 +6,10 @@ const {
   deleteDepartment,
 } = require('../controllers/department.controller');
 
-router.post('/create', createDepartment);
-router.get('/', getDepartment);
-router.post('/delete', deleteDepartment);
+const verifyToken = require('../middlewares/authJWT');
+
+router.post('/create', verifyToken, createDepartment);
+router.get('/', verifyToken, getDepartment);
+router.post('/delete', verifyToken, deleteDepartment);
 
 module.exports = router;

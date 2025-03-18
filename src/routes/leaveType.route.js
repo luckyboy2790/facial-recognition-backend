@@ -5,9 +5,10 @@ const {
   getJobTitle,
   deleteJobTitle,
 } = require('../controllers/leaveType.controller');
+const verifyToken = require('../middlewares/authJWT');
 
-router.post('/create', createJobTitle);
-router.get('/', getJobTitle);
-router.post('/delete', deleteJobTitle);
+router.post('/create', verifyToken, createJobTitle);
+router.get('/', verifyToken, getJobTitle);
+router.post('/delete', verifyToken, deleteJobTitle);
 
 module.exports = router;
