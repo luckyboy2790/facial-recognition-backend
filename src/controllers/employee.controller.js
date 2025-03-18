@@ -428,8 +428,6 @@ exports.archiveEmployee = async (req, res) => {
 
 exports.getTotalEmployee = async (req, res) => {
   try {
-    console.log(req.user);
-
     const loggedInEmployeeId = req.user.employee;
 
     const pipeline = [
@@ -485,8 +483,6 @@ exports.getTotalEmployee = async (req, res) => {
     ];
 
     const employeeData = await EmployeeModel.aggregate(pipeline);
-
-    console.log(employeeData);
 
     res.json({ employeeData });
   } catch (error) {

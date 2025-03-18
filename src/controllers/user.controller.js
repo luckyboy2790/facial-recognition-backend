@@ -4,8 +4,6 @@ const bcrypt = require('bcryptjs');
 
 exports.createRole = async (req, res) => {
   try {
-    console.log(req.body);
-
     const { name, status, accessRight } = req.body;
 
     const newRole = new UserRoleModel({
@@ -26,8 +24,6 @@ exports.createRole = async (req, res) => {
 
 exports.getRole = async (req, res) => {
   try {
-    console.log(req.query);
-
     const roleList = await UserRoleModel.find({});
 
     res.status(200).send({ message: 'Fetch Role Data successfully', roleList });
@@ -39,8 +35,6 @@ exports.getRole = async (req, res) => {
 
 exports.updateRole = async (req, res) => {
   try {
-    console.log(req.body);
-
     const { id } = req.params;
 
     const { name, status, accessRight } = req.body;
@@ -76,7 +70,10 @@ exports.createUser = async (req, res) => {
   try {
     const { employee, email, status, account_type, role, password } = req.body;
 
-    const existEmployee = UserRoleModel.findOne({ employee: employee });
+    const existEmployee = await UserModel.findOne({ employee: employee });
+
+    console.log(existEmployee);
+
     if (existEmployee) {
       return res.status(500).json({ message: 'Employee exist!' });
     }
@@ -203,8 +200,6 @@ exports.updateUserData = async (req, res) => {
     }
 
     await UserModel.findByIdAndUpdate(id, updateData, { new: true });
-
-    console.log(req.body);
 
     res.status(200).json({ message: 'Update Successfully' });
   } catch (error) {

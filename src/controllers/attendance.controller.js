@@ -243,6 +243,8 @@ exports.updateAttendance = async (req, res) => {
 
     const { employee, date, time_in, time_out, reason } = req.body;
 
+    console.log(time_out);
+
     if (time_in === '') {
       return res.status(500).json({
         message: `You have to input time in.`,
