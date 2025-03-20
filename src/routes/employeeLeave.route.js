@@ -5,6 +5,7 @@ const {
   getPersonalEmployeeLeave,
   getPersonalEmployeeLeaveDetail,
   updateEmployeeLeave,
+  deleteEmployeeLeave,
 } = require('../controllers/employeeLeave.controller');
 const verifyToken = require('../middlewares/authJWT');
 
@@ -12,5 +13,6 @@ router.post('/personal/create_leave', verifyToken, createEmployeeLeave);
 router.get('/personal/get_personal_leaves', verifyToken, getPersonalEmployeeLeave);
 router.get('/personal/get_personal_leave/:id', verifyToken, getPersonalEmployeeLeaveDetail);
 router.post('/personal/update_leave/:id', verifyToken, updateEmployeeLeave);
+router.post('/personal/delete_leave', verifyToken, deleteEmployeeLeave);
 
 module.exports = router;
