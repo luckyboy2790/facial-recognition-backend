@@ -145,7 +145,7 @@ exports.getPersonalEmployeeLeaveDetail = async (req, res) => {
   }
 };
 
-exports.updateEmployeeLeave = async (req, res) => {
+exports.updatePersonalEmployeeLeave = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -276,6 +276,41 @@ exports.getEmployeeLeave = async (req, res) => {
       list: leaveRecords,
       total: totalRecords,
     });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.updateEmployeeLeave = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: 'Leave ID is required' });
+    }
+
+    const { leaveType, leaveFrom, leaveTo, leaveReturn, reason, status, comment } = req.body;
+
+    const updatedLeave = await EmployeeLeaveModel.findByIdAndUpdate(
+      id,
+      {
+        LeaveType: leaveType,
+        leaveFrom: leaveFrom,
+        leaveTo: leaveTo,
+        leaveReturn: leaveReturn,
+        reason: reason,
+        status: status,
+        comment: comment,
+      },
+      { new: true },
+    );
+
+    if (!updatedLeave) {
+      return res.status(404).json({ message: 'Leave record not found' });
+    }
+
+    res.status(200).json({ message: 'Update Success', job_title: updatedLeave });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
