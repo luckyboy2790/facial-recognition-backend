@@ -177,3 +177,22 @@ exports.updateEmployeeLeave = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.deleteEmployeeLeave = async (req, res) => {
+  try {
+    const data = req.body;
+
+    for (let id of data.leaveIds) {
+      const leaveId = await EmployeeLeaveModel.findByIdAndDelete(id);
+
+      if (!leaveId) {
+        throw new Error('Delete failed');
+      }
+    }
+
+    res.json({ message: 'Delete Successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
