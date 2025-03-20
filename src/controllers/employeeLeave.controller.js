@@ -118,3 +118,62 @@ exports.getPersonalEmployeeLeave = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+exports.getPersonalEmployeeLeaveDetail = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log(id);
+
+    if (!id) {
+      return res.status(400).json({ message: 'Leave ID is required' });
+    }
+
+    const leaveRecord = await EmployeeLeaveModel.findById(id);
+
+    if (!leaveRecord) {
+      return res.status(404).json({ message: 'Leave record not found' });
+    }
+
+    res.status(200).json({
+      message: 'Employee Leave detail fetched successfully',
+      leaveRecord,
+    });
+  } catch (error) {
+    console.error('Error getting employee leave detail:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+exports.updateEmployeeLeave = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: 'Leave ID is required' });
+    }
+
+    const { leaveType, leaveFrom, leaveTo, leaveReturn, reason } = req.body;
+
+    const updatedLeave = await EmployeeLeaveModel.findByIdAndUpdate(
+      id,
+      {
+        LeaveType: leaveType,
+        leaveFrom: leaveFrom,
+        leaveTo: leaveTo,
+        leaveReturn: leaveReturn,
+        reason: reason,
+      },
+      { new: true },
+    );
+
+    if (!updatedLeave) {
+      return res.status(404).json({ message: 'Leave record not found' });
+    }
+
+    res.status(200).json({ message: 'Update Success', job_title: updatedLeave });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
