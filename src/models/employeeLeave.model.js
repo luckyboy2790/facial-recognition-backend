@@ -5,8 +5,11 @@ const Schema = mongoose.Schema;
  * User Schema
  */
 const employeeLeaveSchema = new Schema({
-  LeaveType: {
-    type: String,
+  leaveType: {
+    type: Schema.Types.ObjectId,
+  },
+  employee: {
+    type: Schema.Types.ObjectId,
   },
   leaveFrom: {
     type: String,
