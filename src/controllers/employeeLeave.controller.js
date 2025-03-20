@@ -8,7 +8,7 @@ exports.createEmployeeLeave = async (req, res) => {
     const { employee } = req.user;
 
     const newLeave = new EmployeeLeaveModel({
-      LeaveType: leaveType,
+      leaveType: leaveType,
       leaveFrom: leaveFrom,
       leaveTo: leaveTo,
       leaveReturn: leaveReturn,
@@ -62,7 +62,7 @@ exports.getPersonalEmployeeLeave = async (req, res) => {
           from: 'leavetypes',
           localField: 'leaveType',
           foreignField: '_id',
-          as: 'leaveType',
+          as: 'leaveTypeData',
         },
       },
       {
@@ -74,7 +74,7 @@ exports.getPersonalEmployeeLeave = async (req, res) => {
         },
       },
       {
-        $unwind: { path: '$leaveType', preserveNullAndEmptyArrays: true },
+        $unwind: { path: '$leaveTypeData', preserveNullAndEmptyArrays: true },
       },
       {
         $unwind: { path: '$employeeData', preserveNullAndEmptyArrays: true },
@@ -191,6 +191,91 @@ exports.deleteEmployeeLeave = async (req, res) => {
     }
 
     res.json({ message: 'Delete Successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ---------------------------For Admin-------------------------
+
+exports.getEmployeeLeave = async (req, res) => {
+  try {
+    const { pageIndex = 1, pageSize = 10, query = '', sort = {} } = req.query;
+
+    const page = parseInt(pageIndex, 10);
+    const limit = parseInt(pageSize, 10);
+    const skip = (page - 1) * limit;
+
+    const { employee } = req.user;
+
+    let filter = {
+      employee: employee,
+    };
+
+    if (query) {
+      const searchRegex = new RegExp(query, 'i');
+
+      filter = {
+        ...filter,
+        $or: [
+          { 'leaveTypeData.leave_name': { $regex: searchRegex } },
+          { 'employeeData.full_name': { $regex: searchRegex } },
+          { leaveFrom: { $regex: searchRegex } },
+          { leaveTo: { $regex: searchRegex } },
+          { leaveReturn: { $regex: searchRegex } },
+          { status: { $regex: searchRegex } },
+        ],
+      };
+    }
+
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'leavetypes',
+          localField: 'leaveType',
+          foreignField: '_id',
+          as: 'leaveTypeData',
+        },
+      },
+      {
+        $lookup: {
+          from: 'employees',
+          localField: 'employee',
+          foreignField: '_id',
+          as: 'employeeData',
+        },
+      },
+      {
+        $unwind: { path: '$leaveTypeData', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: '$employeeData', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $match: filter,
+      },
+      {
+        $sort: sort.key ? { [sort.key]: sort.order === 'asc' ? 1 : -1 } : { full_name: 1 },
+      },
+      {
+        $facet: {
+          metadata: [{ $count: 'totalEmployees' }],
+          data: [{ $skip: skip }, { $limit: limit }],
+        },
+      },
+    ];
+
+    const result = await EmployeeLeaveModel.aggregate(pipeline);
+
+    const leaveRecords = result[0].data;
+    const totalRecords = result[0].metadata.length > 0 ? result[0].metadata[0].totalEmployees : 0;
+
+    res.status(200).json({
+      message: 'Employee leave records fetched successfully',
+      list: leaveRecords,
+      total: totalRecords,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
