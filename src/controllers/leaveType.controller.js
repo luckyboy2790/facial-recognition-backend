@@ -1,20 +1,18 @@
-const JobTitleModel = require('../models/leaveType.model');
+const LeaveTypeModel = require('../models/leaveType.model');
 
 exports.createJobTitle = async (req, res) => {
   try {
     console.log(req.body);
 
-    const { leaveName, credits, percalendar } = req.body;
+    const { leaveName } = req.body;
 
-    const newJobTitle = new JobTitleModel({
+    const newLeave = new LeaveTypeModel({
       leave_name: leaveName,
-      credits,
-      percalendar,
     });
 
-    const companyId = await newJobTitle.save();
+    const leaveId = await newLeave.save();
 
-    res.json({ message: 'Create Success', company: companyId });
+    res.json({ message: 'Create Success', company: leaveId });
   } catch (error) {
     console.log(error);
   }
@@ -36,12 +34,12 @@ exports.getJobTitle = async (req, res) => {
       sortOption[sort.key] = sort.order === 'desc' ? -1 : 1;
     }
 
-    const jobTitles = await JobTitleModel.find(filter)
+    const jobTitles = await LeaveTypeModel.find(filter)
       .sort(sortOption)
       .skip((pageIndex - 1) * pageSize)
       .limit(pageSize);
 
-    const totalJobTitles = await JobTitleModel.countDocuments(filter);
+    const totalJobTitles = await LeaveTypeModel.countDocuments(filter);
 
     res.json({
       message: 'success',
@@ -60,7 +58,7 @@ exports.deleteJobTitle = async (req, res) => {
     const data = req.body;
 
     for (let id of data.leaveTypeIds) {
-      const company_id = await JobTitleModel.findByIdAndDelete(id);
+      const company_id = await LeaveTypeModel.findByIdAndDelete(id);
 
       if (!company_id) {
         throw new Error('Delete failed');
