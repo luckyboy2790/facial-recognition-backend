@@ -108,11 +108,14 @@ exports.getEmployee = async (req, res) => {
   try {
     const { pageIndex = 1, pageSize = 10, query = '', sort = {} } = req.query;
 
-    const loggedInEmployeeId = req.user.employee;
-
     const page = parseInt(pageIndex, 10);
     const limit = parseInt(pageSize, 10);
     const skip = (page - 1) * limit;
+
+    const user = await UserModel.findOne({ account_type: 'SuperAdmin' });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
     const pipeline = [
       {
@@ -161,7 +164,7 @@ exports.getEmployee = async (req, res) => {
       },
       {
         $match: {
-          _id: { $ne: loggedInEmployeeId },
+          _id: { $ne: user.employee },
           $or: [
             { full_name: { $regex: query, $options: 'i' } },
             { employee_status: { $regex: query, $options: 'i' } },
@@ -477,7 +480,10 @@ exports.getTotalEmployee = async (req, res) => {
       },
       {
         $match: {
-          _id: { $ne: loggedInEmployeeId },
+          company_id: { $nin: [null, undefined] },
+          department_id: { $nin: [null, undefined] },
+          job_title_id: { $nin: [null, undefined] },
+          email: 'jairo.visionam@gmail.com',
         },
       },
     ];

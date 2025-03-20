@@ -104,8 +104,6 @@ exports.getUsers = async (req, res) => {
     const limit = parseInt(pageSize, 10);
     const skip = (page - 1) * limit;
 
-    const userId = req.user._id;
-
     const pipeline = [
       {
         $lookup: {
@@ -131,7 +129,7 @@ exports.getUsers = async (req, res) => {
       },
       {
         $match: {
-          _id: { $ne: userId },
+          account_type: { $ne: 'SuperAdmin' },
           $or: [
             { email: { $regex: query, $options: 'i' } },
             { account_type: { $regex: query, $options: 'i' } },
