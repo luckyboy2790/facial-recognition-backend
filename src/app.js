@@ -1,14 +1,22 @@
 const express = require('express');
 const app = express();
 
+const dashboardRoute = require('./routes/dashboard.route');
+
 const userRoute = require('./routes/user.route');
+
 const companyRoute = require('./routes/company.route');
+
 const departmentRoute = require('./routes/department.route');
+
 const jobTitileRoute = require('./routes/jobTitle.route');
+
 const leaveTypeRoute = require('./routes/leaveType.route');
+
 const leaveGroupRoute = require('./routes/leaveGroup.route');
 
 const employeeRoute = require('./routes/employee.route');
+
 const uploadRoutes = require('./routes/uploadRoutes');
 
 const scheduleRoutes = require('./routes/schedule.route');
@@ -43,6 +51,8 @@ app.use((req, res, next) => {
   console.log(`\x1b[42m ${req.method} ${req.url} request received.\x1b[0m`);
   next();
 });
+
+app.use('/api/dashboard', dashboardRoute);
 
 app.use('/api/user', userRoute);
 
