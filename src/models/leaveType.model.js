@@ -9,14 +9,6 @@ const leaveTypeSchema = new Schema({
     type: String,
     required: [true, 'Leave Name not provided'],
   },
-  credits: {
-    type: String,
-    required: [true, 'Credit not provided'],
-  },
-  percalendar: {
-    type: String,
-    required: [true, 'Term not provided'],
-  },
 });
 
 module.exports = mongoose.model('LeaveType', leaveTypeSchema);
