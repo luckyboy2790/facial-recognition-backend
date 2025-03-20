@@ -165,6 +165,7 @@ exports.getEmployee = async (req, res) => {
       {
         $match: {
           _id: { $ne: user.employee },
+          employee_status: 'Active',
           $or: [
             { full_name: { $regex: query, $options: 'i' } },
             { employee_status: { $regex: query, $options: 'i' } },
@@ -259,11 +260,6 @@ exports.getEmployeeDetail = async (req, res) => {
       },
       {
         $unwind: { path: '$leave_group', preserveNullAndEmptyArrays: true },
-      },
-      {
-        $match: {
-          _id: { $ne: loggedInEmployeeId },
-        },
       },
     ];
 
@@ -431,7 +427,10 @@ exports.archiveEmployee = async (req, res) => {
 
 exports.getTotalEmployee = async (req, res) => {
   try {
-    const loggedInEmployeeId = req.user.employee;
+    const user = await UserModel.findOne({ account_type: 'SuperAdmin' });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
     const pipeline = [
       {
@@ -480,10 +479,8 @@ exports.getTotalEmployee = async (req, res) => {
       },
       {
         $match: {
-          company_id: { $nin: [null, undefined] },
-          department_id: { $nin: [null, undefined] },
-          job_title_id: { $nin: [null, undefined] },
-          email: 'jairo.visionam@gmail.com',
+          _id: { $ne: user.employee },
+          employee_status: 'Active',
         },
       },
     ];
