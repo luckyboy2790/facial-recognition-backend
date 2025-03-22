@@ -1,5 +1,5 @@
-const EmployeeLeaveModel = require('../models/employeeLeave.model');
-const moment = require('moment');
+const EmployeeLeaveModel = require("../models/employeeLeave.model");
+const moment = require("moment");
 
 exports.createEmployeeLeave = async (req, res) => {
   try {
@@ -18,7 +18,7 @@ exports.createEmployeeLeave = async (req, res) => {
 
     const leaveId = await newLeave.save();
 
-    res.json({ message: 'Create Success', job_title: leaveId });
+    res.json({ message: "Create Success", job_title: leaveId });
   } catch (error) {
     console.log(error);
   }
@@ -26,7 +26,7 @@ exports.createEmployeeLeave = async (req, res) => {
 
 exports.getPersonalEmployeeLeave = async (req, res) => {
   try {
-    const { pageIndex = 1, pageSize = 10, query = '', sort = {} } = req.query;
+    const { pageIndex = 1, pageSize = 10, query = "", sort = {} } = req.query;
 
     const page = parseInt(pageIndex, 10);
     const limit = parseInt(pageSize, 10);
@@ -34,11 +34,13 @@ exports.getPersonalEmployeeLeave = async (req, res) => {
 
     let dateFilter = {};
 
-    if (query !== '') {
+    if (query !== "") {
       try {
         const parsedDates = JSON.parse(query);
         if (Array.isArray(parsedDates) && parsedDates.length === 2) {
-          const [startDate, endDate] = parsedDates.map((date) => moment(date).format('YYYY-MM-DD'));
+          const [startDate, endDate] = parsedDates.map((date) =>
+            moment(date).format("YYYY-MM-DD")
+          );
 
           dateFilter = {
             $or: [
@@ -49,8 +51,8 @@ exports.getPersonalEmployeeLeave = async (req, res) => {
           };
         }
       } catch (error) {
-        console.error('Invalid query format:', error);
-        return res.status(400).json({ message: 'Invalid date query format' });
+        console.error("Invalid query format:", error);
+        return res.status(400).json({ message: "Invalid date query format" });
       }
     }
 
@@ -59,25 +61,25 @@ exports.getPersonalEmployeeLeave = async (req, res) => {
     const pipeline = [
       {
         $lookup: {
-          from: 'leavetypes',
-          localField: 'leaveType',
-          foreignField: '_id',
-          as: 'leaveTypeData',
+          from: "leavetypes",
+          localField: "leaveType",
+          foreignField: "_id",
+          as: "leaveTypeData",
         },
       },
       {
         $lookup: {
-          from: 'employees',
-          localField: 'employee',
-          foreignField: '_id',
-          as: 'employeeData',
+          from: "employees",
+          localField: "employee",
+          foreignField: "_id",
+          as: "employeeData",
         },
       },
       {
-        $unwind: { path: '$leaveTypeData', preserveNullAndEmptyArrays: true },
+        $unwind: { path: "$leaveTypeData", preserveNullAndEmptyArrays: true },
       },
       {
-        $unwind: { path: '$employeeData', preserveNullAndEmptyArrays: true },
+        $unwind: { path: "$employeeData", preserveNullAndEmptyArrays: true },
       },
       {
         $match: {
@@ -86,11 +88,13 @@ exports.getPersonalEmployeeLeave = async (req, res) => {
         },
       },
       {
-        $sort: sort.key ? { [sort.key]: sort.order === 'asc' ? 1 : -1 } : { full_name: 1 },
+        $sort: sort.key
+          ? { [sort.key]: sort.order === "asc" ? 1 : -1 }
+          : { full_name: 1 },
       },
       {
         $facet: {
-          metadata: [{ $count: 'totalEmployees' }],
+          metadata: [{ $count: "totalEmployees" }],
           data: [{ $skip: skip }, { $limit: limit }],
         },
       },
@@ -99,23 +103,24 @@ exports.getPersonalEmployeeLeave = async (req, res) => {
     const result = await EmployeeLeaveModel.aggregate(pipeline);
 
     let leaveRecords = result[0].data;
-    const totalRecords = result[0].metadata.length > 0 ? result[0].metadata[0].totalEmployees : 0;
+    const totalRecords =
+      result[0].metadata.length > 0 ? result[0].metadata[0].totalEmployees : 0;
 
     leaveRecords = leaveRecords.map((record) => ({
       ...record,
-      leaveFrom: moment(record.leaveFrom).format('YYYY-MM-DD'),
-      leaveTo: moment(record.leaveTo).format('YYYY-MM-DD'),
-      leaveReturn: moment(record.leaveReturn).format('YYYY-MM-DD'),
+      leaveFrom: moment(record.leaveFrom).format("YYYY-MM-DD"),
+      leaveTo: moment(record.leaveTo).format("YYYY-MM-DD"),
+      leaveReturn: moment(record.leaveReturn).format("YYYY-MM-DD"),
     }));
 
     res.status(200).json({
-      message: 'Employee leave records fetched successfully',
+      message: "Employee leave records fetched successfully",
       list: leaveRecords,
       total: totalRecords,
     });
   } catch (error) {
-    console.error('Error getting employee leave records:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error getting employee leave records:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -126,22 +131,22 @@ exports.getPersonalEmployeeLeaveDetail = async (req, res) => {
     console.log(id);
 
     if (!id) {
-      return res.status(400).json({ message: 'Leave ID is required' });
+      return res.status(400).json({ message: "Leave ID is required" });
     }
 
     const leaveRecord = await EmployeeLeaveModel.findById(id);
 
     if (!leaveRecord) {
-      return res.status(404).json({ message: 'Leave record not found' });
+      return res.status(404).json({ message: "Leave record not found" });
     }
 
     res.status(200).json({
-      message: 'Employee Leave detail fetched successfully',
+      message: "Employee Leave detail fetched successfully",
       leaveRecord,
     });
   } catch (error) {
-    console.error('Error getting employee leave detail:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error getting employee leave detail:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -150,7 +155,7 @@ exports.updatePersonalEmployeeLeave = async (req, res) => {
     const { id } = req.params;
 
     if (!id) {
-      return res.status(400).json({ message: 'Leave ID is required' });
+      return res.status(400).json({ message: "Leave ID is required" });
     }
 
     const { leaveType, leaveFrom, leaveTo, leaveReturn, reason } = req.body;
@@ -164,14 +169,16 @@ exports.updatePersonalEmployeeLeave = async (req, res) => {
         leaveReturn: leaveReturn,
         reason: reason,
       },
-      { new: true },
+      { new: true }
     );
 
     if (!updatedLeave) {
-      return res.status(404).json({ message: 'Leave record not found' });
+      return res.status(404).json({ message: "Leave record not found" });
     }
 
-    res.status(200).json({ message: 'Update Success', job_title: updatedLeave });
+    res
+      .status(200)
+      .json({ message: "Update Success", job_title: updatedLeave });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
@@ -186,11 +193,11 @@ exports.deleteEmployeeLeave = async (req, res) => {
       const leaveId = await EmployeeLeaveModel.findByIdAndDelete(id);
 
       if (!leaveId) {
-        throw new Error('Delete failed');
+        throw new Error("Delete failed");
       }
     }
 
-    res.json({ message: 'Delete Successfully' });
+    res.json({ message: "Delete Successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
@@ -201,26 +208,26 @@ exports.deleteEmployeeLeave = async (req, res) => {
 
 exports.getEmployeeLeave = async (req, res) => {
   try {
-    const { pageIndex = 1, pageSize = 10, query = '', sort = {} } = req.query;
+    const { pageIndex = 1, pageSize = 10, query = "", sort = {} } = req.query;
 
     const page = parseInt(pageIndex, 10);
     const limit = parseInt(pageSize, 10);
     const skip = (page - 1) * limit;
 
-    const { employee } = req.user;
+    let filter = {};
 
-    let filter = {
-      employee: employee,
-    };
+    if (req.user.account_type === "Admin") {
+      filter["employeeData.company_id"] = req.user.employeeData.company_id;
+    }
 
     if (query) {
-      const searchRegex = new RegExp(query, 'i');
+      const searchRegex = new RegExp(query, "i");
 
       filter = {
         ...filter,
         $or: [
-          { 'leaveTypeData.leave_name': { $regex: searchRegex } },
-          { 'employeeData.full_name': { $regex: searchRegex } },
+          { "leaveTypeData.leave_name": { $regex: searchRegex } },
+          { "employeeData.full_name": { $regex: searchRegex } },
           { leaveFrom: { $regex: searchRegex } },
           { leaveTo: { $regex: searchRegex } },
           { leaveReturn: { $regex: searchRegex } },
@@ -229,38 +236,42 @@ exports.getEmployeeLeave = async (req, res) => {
       };
     }
 
+    console.log(filter);
+
     const pipeline = [
       {
         $lookup: {
-          from: 'leavetypes',
-          localField: 'leaveType',
-          foreignField: '_id',
-          as: 'leaveTypeData',
+          from: "leavetypes",
+          localField: "leaveType",
+          foreignField: "_id",
+          as: "leaveTypeData",
         },
       },
       {
         $lookup: {
-          from: 'employees',
-          localField: 'employee',
-          foreignField: '_id',
-          as: 'employeeData',
+          from: "employees",
+          localField: "employee",
+          foreignField: "_id",
+          as: "employeeData",
         },
       },
       {
-        $unwind: { path: '$leaveTypeData', preserveNullAndEmptyArrays: true },
+        $unwind: { path: "$leaveTypeData", preserveNullAndEmptyArrays: true },
       },
       {
-        $unwind: { path: '$employeeData', preserveNullAndEmptyArrays: true },
+        $unwind: { path: "$employeeData", preserveNullAndEmptyArrays: true },
       },
       {
         $match: filter,
       },
       {
-        $sort: sort.key ? { [sort.key]: sort.order === 'asc' ? 1 : -1 } : { full_name: 1 },
+        $sort: sort.key
+          ? { [sort.key]: sort.order === "asc" ? 1 : -1 }
+          : { full_name: 1 },
       },
       {
         $facet: {
-          metadata: [{ $count: 'totalEmployees' }],
+          metadata: [{ $count: "totalEmployees" }],
           data: [{ $skip: skip }, { $limit: limit }],
         },
       },
@@ -269,10 +280,11 @@ exports.getEmployeeLeave = async (req, res) => {
     const result = await EmployeeLeaveModel.aggregate(pipeline);
 
     const leaveRecords = result[0].data;
-    const totalRecords = result[0].metadata.length > 0 ? result[0].metadata[0].totalEmployees : 0;
+    const totalRecords =
+      result[0].metadata.length > 0 ? result[0].metadata[0].totalEmployees : 0;
 
     res.status(200).json({
-      message: 'Employee leave records fetched successfully',
+      message: "Employee leave records fetched successfully",
       list: leaveRecords,
       total: totalRecords,
     });
@@ -287,10 +299,18 @@ exports.updateEmployeeLeave = async (req, res) => {
     const { id } = req.params;
 
     if (!id) {
-      return res.status(400).json({ message: 'Leave ID is required' });
+      return res.status(400).json({ message: "Leave ID is required" });
     }
 
-    const { leaveType, leaveFrom, leaveTo, leaveReturn, reason, status, comment } = req.body;
+    const {
+      leaveType,
+      leaveFrom,
+      leaveTo,
+      leaveReturn,
+      reason,
+      status,
+      comment,
+    } = req.body;
 
     const updatedLeave = await EmployeeLeaveModel.findByIdAndUpdate(
       id,
@@ -303,14 +323,16 @@ exports.updateEmployeeLeave = async (req, res) => {
         status: status,
         comment: comment,
       },
-      { new: true },
+      { new: true }
     );
 
     if (!updatedLeave) {
-      return res.status(404).json({ message: 'Leave record not found' });
+      return res.status(404).json({ message: "Leave record not found" });
     }
 
-    res.status(200).json({ message: 'Update Success', job_title: updatedLeave });
+    res
+      .status(200)
+      .json({ message: "Update Success", job_title: updatedLeave });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
