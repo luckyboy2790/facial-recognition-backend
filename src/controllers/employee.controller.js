@@ -462,17 +462,6 @@ exports.getTotalEmployee = async (req, res) => {
       employee_status: "Active",
     };
 
-    if (query) {
-      filter.$or = [
-        { full_name: { $regex: query, $options: "i" } },
-        { employee_status: { $regex: query, $options: "i" } },
-        { "company.company_name": { $regex: query, $options: "i" } },
-        { "department.department_name": { $regex: query, $options: "i" } },
-        { "job_title.job_title": { $regex: query, $options: "i" } },
-        { "leave_group.group_name": { $regex: query, $options: "i" } },
-      ];
-    }
-
     if (req.user.account_type === "Admin") {
       filter.company_id = req.user.employeeData.company_id;
     }
