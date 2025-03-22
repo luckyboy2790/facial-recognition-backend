@@ -167,8 +167,6 @@ exports.getAttendance = async (req, res) => {
       dateFilter["employeeData.company_id"] = req.user.employeeData.company_id;
     }
 
-    console.log(dateFilter);
-
     const pipeline = [
       {
         $lookup: {
