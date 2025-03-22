@@ -231,12 +231,11 @@ exports.getEmployeeLeave = async (req, res) => {
           { leaveFrom: { $regex: searchRegex } },
           { leaveTo: { $regex: searchRegex } },
           { leaveReturn: { $regex: searchRegex } },
+          { reason: { $regex: searchRegex } },
           { status: { $regex: searchRegex } },
         ],
       };
     }
-
-    console.log(filter);
 
     const pipeline = [
       {
