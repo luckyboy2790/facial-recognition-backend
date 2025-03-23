@@ -1,4 +1,4 @@
-const CompanyModel = require('../models/company.model');
+const CompanyModel = require("../models/company.model");
 
 exports.createCompany = async (req, res) => {
   try {
@@ -10,7 +10,7 @@ exports.createCompany = async (req, res) => {
 
     const companyId = await newCompany.save();
 
-    res.json({ message: 'Create Success', company: companyId });
+    res.json({ message: "Create Success", company: companyId });
   } catch (error) {
     console.log(error);
   }
@@ -25,11 +25,13 @@ exports.getCompany = async (req, res) => {
     pageIndex = parseInt(pageIndex) || 1;
     pageSize = parseInt(pageSize) || 10;
 
-    const filter = query ? { company_name: { $regex: query, $options: 'i' } } : {};
+    const filter = query
+      ? { company_name: { $regex: query, $options: "i" } }
+      : {};
 
     let sortOption = {};
     if (sort && sort.key) {
-      sortOption[sort.key] = sort.order === 'desc' ? -1 : 1;
+      sortOption[sort.key] = sort.order === "desc" ? -1 : 1;
     }
 
     const companies = await CompanyModel.find(filter)
@@ -40,7 +42,7 @@ exports.getCompany = async (req, res) => {
     const totalCompanies = await CompanyModel.countDocuments(filter);
 
     res.json({
-      message: 'success',
+      message: "success",
       list: companies,
       total: totalCompanies,
     });
@@ -59,11 +61,26 @@ exports.deleteCompany = async (req, res) => {
       const company_id = await CompanyModel.findByIdAndDelete(id);
 
       if (!company_id) {
-        throw new Error('Delete failed');
+        throw new Error("Delete failed");
       }
     }
 
-    res.json({ message: 'Delete Successfully' });
+    res.json({ message: "Delete Successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getTotalCompany = async (req, res) => {
+  try {
+    const companies = await CompanyModel.find({});
+
+    res.json({
+      message: "success",
+      list: companies,
+      total: totalCompanies,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
