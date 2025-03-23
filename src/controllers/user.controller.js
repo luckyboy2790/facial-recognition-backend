@@ -25,7 +25,13 @@ exports.createRole = async (req, res) => {
 
 exports.getRole = async (req, res) => {
   try {
-    const roleList = await UserRoleModel.find({});
+    let filter = {};
+
+    if (req.user.account_type === "Admin") {
+      filter.company = req.user.employeeData.company_id;
+    }
+
+    const roleList = await UserRoleModel.find(filter);
 
     res.status(200).send({ message: "Fetch Role Data successfully", roleList });
   } catch (error) {
