@@ -4,11 +4,12 @@ const bcrypt = require("bcryptjs");
 
 exports.createRole = async (req, res) => {
   try {
-    const { name, status, accessRight } = req.body;
+    const { name, status, accessRight, company } = req.body;
 
     const newRole = new UserRoleModel({
       name: name,
       status: status,
+      company: company ? company : req.user.employeeData.company_id,
       accessRight: accessRight,
     });
 
@@ -65,6 +66,8 @@ exports.deleteRole = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// ------------------- */ User /* -------------------
 
 exports.createUser = async (req, res) => {
   try {
