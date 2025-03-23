@@ -14,7 +14,7 @@ const userRoleSchema = new Schema({
     required: [true, "Role Status not provided"],
   },
   company: {
-    type: String,
+    type: Schema.Types.ObjectId,
     required: [true, "Company not provided"],
   },
   accessRight: {

@@ -31,7 +31,24 @@ exports.getRole = async (req, res) => {
       filter.company = req.user.employeeData.company_id;
     }
 
-    const roleList = await UserRoleModel.find(filter);
+    console.log(filter);
+
+    const pipeline = [
+      {
+        $lookup: {
+          from: "companies",
+          localField: "company",
+          foreignField: "_id",
+          as: "companyData",
+        },
+      },
+      { $unwind: { path: "$companyData", preserveNullAndEmptyArrays: true } },
+      {
+        $match: filter,
+      },
+    ];
+
+    const roleList = await UserRoleModel.aggregate(pipeline);
 
     res.status(200).send({ message: "Fetch Role Data successfully", roleList });
   } catch (error) {
@@ -44,11 +61,12 @@ exports.updateRole = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { name, status, accessRight } = req.body;
+    const { name, status, accessRight, company } = req.body;
 
     await UserRoleModel.findByIdAndUpdate(id, {
       name: name,
       status: status,
+      company: company ? company : req.user.employeeData.company_id,
       accessRight: accessRight,
     });
 
@@ -129,6 +147,7 @@ exports.getUsers = async (req, res) => {
 
     if (req.user.account_type === "Admin") {
       filter["employeeData.company_id"] = req.user.employeeData.company_id;
+      filter._id = { $ne: req.user._id };
     }
 
     const pipeline = [
@@ -230,6 +249,8 @@ exports.updateUserData = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     const data = req.body;
+
+    console.log(data);
 
     for (let id of data.userIds) {
       const user_id = await UserModel.findByIdAndDelete(id);
