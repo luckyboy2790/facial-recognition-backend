@@ -2,8 +2,6 @@ const DepartmentModel = require("../models/department.model");
 
 exports.createDepartment = async (req, res) => {
   try {
-    console.log(req.body);
-
     const { departmentName, company } = req.body;
 
     const newDepartment = new DepartmentModel({
@@ -54,15 +52,11 @@ exports.getDepartment = async (req, res) => {
           as: "companyData",
         },
       },
-
       {
         $unwind: { path: "$companyData", preserveNullAndEmptyArrays: true },
       },
-
       { $match: filter },
-
       { $sort: sortOption },
-
       { $skip: (pageIndex - 1) * pageSize },
       { $limit: pageSize },
     ];
