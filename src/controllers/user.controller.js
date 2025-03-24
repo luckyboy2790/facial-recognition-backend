@@ -1,6 +1,7 @@
 const UserRoleModel = require("../models/role.model");
 const UserModel = require("../models/user.model");
 const bcrypt = require("bcryptjs");
+const mongoose = require("mongoose");
 
 exports.createRole = async (req, res) => {
   try {
@@ -210,9 +211,41 @@ exports.getUserDetail = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const userDetail = await UserModel.findById(id);
+    const objectId = new mongoose.Types.ObjectId(id);
 
-    res.status(200).json({ message: "Fetch Data successfully", userDetail });
+    const pipeline = [
+      {
+        $lookup: {
+          from: "employees",
+          localField: "employee",
+          foreignField: "_id",
+          as: "employeeData",
+        },
+      },
+      {
+        $lookup: {
+          from: "userroles",
+          localField: "role",
+          foreignField: "_id",
+          as: "roleData",
+        },
+      },
+      {
+        $unwind: { path: "$employeeData", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: "$roleData", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $match: { _id: objectId },
+      },
+    ];
+
+    const userDetail = await UserModel.aggregate(pipeline);
+
+    res
+      .status(200)
+      .json({ message: "Fetch Data successfully", userDetail: userDetail[0] });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });

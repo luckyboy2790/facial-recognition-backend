@@ -8,7 +8,10 @@ const verifyToken = async (req, res, next) => {
 
       const decoded = jwt.verify(token, process.env.API_SECRET);
 
-      const user = await User.findOne({ email: decoded.id }).exec();
+      const user = await User.findOne({
+        $or: [{ _id: decoded.id }, { email: decoded.email }],
+      }).exec();
+
       if (!user) {
         return res.status(404).send({ message: "User not found" });
       }

@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const User = require('../models/user.model');
-const EmployeeModel = require('../models/employee.model');
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const User = require("../models/user.model");
+const EmployeeModel = require("../models/employee.model");
 
 exports.signup = (req, res) => {
   const { employee, email, status, account_type, role, password } = req.body;
@@ -18,7 +18,7 @@ exports.signup = (req, res) => {
     .save()
     .then(() => {
       res.status(200).send({
-        message: 'User Registered successfully',
+        message: "User Registered successfully",
       });
     })
     .catch((err) => {
@@ -37,16 +37,19 @@ exports.signin = (req, res) => {
     .then(async (user) => {
       if (!user) {
         return res.status(404).send({
-          message: 'User Not found.',
+          message: "User Not found.",
         });
       }
 
-      var passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
+      var passwordIsValid = bcrypt.compareSync(
+        req.body.password,
+        user.password
+      );
 
       if (!passwordIsValid) {
         return res.status(401).send({
           accessToken: null,
-          message: 'Invalid Password!',
+          message: "Invalid Password!",
         });
       }
 
@@ -54,12 +57,13 @@ exports.signin = (req, res) => {
 
       var token = jwt.sign(
         {
-          id: user.email,
+          id: user._id,
+          email: user.email,
         },
         process.env.API_SECRET,
         {
           expiresIn,
-        },
+        }
       );
 
       const expiresAt = new Date(Date.now() + expiresIn * 1000);
@@ -74,7 +78,7 @@ exports.signin = (req, res) => {
           account_type: user.account_type,
           img: employeeData?.img || null,
         },
-        message: 'Login successfull',
+        message: "Login successfull",
         accessToken: token,
         expires_at: expiresAt.toISOString(),
       });
