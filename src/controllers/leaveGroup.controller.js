@@ -1,21 +1,28 @@
-const LeaveGroupModel = require('../models/leaveGroup.model');
+const LeaveGroupModel = require("../models/leaveGroup.model");
 
 exports.createLeaveGroup = async (req, res) => {
   try {
     console.log(req.body);
 
-    const { leaveGroupName, description, leavePrivilege, groupStatus } = req.body;
+    const {
+      leaveGroupName,
+      description,
+      leavePrivilege,
+      groupStatus,
+      company,
+    } = req.body;
 
     const newLeaveGroup = new LeaveGroupModel({
       group_name: leaveGroupName,
       description,
       leaveprivileges: leavePrivilege,
       status: groupStatus,
+      company: company ? company : req.user.employeeData.company_id,
     });
 
     const leaveGroupId = await newLeaveGroup.save();
 
-    res.json({ message: 'Create Success', leave_group: leaveGroupId });
+    res.json({ message: "Create Success", leave_group: leaveGroupId });
   } catch (error) {
     console.log(error);
   }
@@ -30,13 +37,19 @@ exports.getLeaveGroup = async (req, res) => {
     pageIndex = parseInt(pageIndex) || 1;
     pageSize = parseInt(pageSize) || 10;
 
-    const filter = query ? { group_name: { $regex: query, $options: 'i' } } : {};
+    const filter = query
+      ? { group_name: { $regex: query, $options: "i" } }
+      : {};
 
     let sortOption = {};
     if (sort && sort.key) {
-      sortOption[sort.key] = sort.order === 'desc' ? -1 : 1;
+      sortOption[sort.key] = sort.order === "desc" ? -1 : 1;
     } else {
-      sortOption['group_name'] = -1;
+      sortOption["group_name"] = -1;
+    }
+
+    if (req.user.account_type === "Admin") {
+      filter.company = req.user.employeeData.company_id;
     }
 
     const leaveGroups = await LeaveGroupModel.aggregate([
@@ -44,48 +57,49 @@ exports.getLeaveGroup = async (req, res) => {
 
       {
         $lookup: {
-          from: 'leavetypes',
-          localField: 'leaveprivileges',
-          foreignField: '_id',
-          as: 'leaveTypes',
+          from: "leavetypes",
+          localField: "leaveprivileges",
+          foreignField: "_id",
+          as: "leaveTypes",
+        },
+      },
+
+      {
+        $lookup: {
+          from: "companies",
+          localField: "company",
+          foreignField: "_id",
+          as: "companyData",
         },
       },
 
       {
         $addFields: {
-          leaveprivilegesData: '$leaveTypes',
+          leaveprivilegesData: "$leaveTypes",
           leaveTypeNames: {
             $cond: {
-              if: { $gt: [{ $size: '$leaveTypes' }, 0] },
+              if: { $gt: [{ $size: "$leaveTypes" }, 0] },
               then: {
                 $reduce: {
-                  input: '$leaveTypes',
-                  initialValue: '',
+                  input: "$leaveTypes",
+                  initialValue: "",
                   in: {
                     $concat: [
-                      '$$value',
-                      { $cond: [{ $eq: ['$$value', ''] }, '', ', '] },
-                      '$$this.leave_name',
+                      "$$value",
+                      { $cond: [{ $eq: ["$$value", ""] }, "", ", "] },
+                      "$$this.leave_name",
                     ],
                   },
                 },
               },
-              else: 'No Leave Types',
+              else: "No Leave Types",
             },
           },
         },
       },
 
       {
-        $project: {
-          _id: 1,
-          group_name: 1,
-          description: 1,
-          leaveprivilegesData: 1,
-          status: 1,
-          leaveprivileges: 1,
-          leaveTypeNames: 1,
-        },
+        $unwind: { path: "$companyData", preserveNullAndEmptyArrays: true },
       },
 
       { $sort: sortOption },
@@ -96,7 +110,7 @@ exports.getLeaveGroup = async (req, res) => {
     const totalLeaveGroups = await LeaveGroupModel.countDocuments(filter);
 
     res.json({
-      message: 'success',
+      message: "success",
       list: leaveGroups,
       total: totalLeaveGroups,
     });
@@ -108,10 +122,11 @@ exports.getLeaveGroup = async (req, res) => {
 
 exports.updateLeaveGroup = async (req, res) => {
   try {
-    const { _id, leaveGroupName, description, leavePrivilege, groupStatus } = req.body;
+    const { _id, leaveGroupName, description, leavePrivilege, groupStatus } =
+      req.body;
 
     if (!_id) {
-      return res.status(400).json({ message: 'Leave Group ID is required' });
+      return res.status(400).json({ message: "Leave Group ID is required" });
     }
 
     const updatedLeaveGroup = await LeaveGroupModel.findByIdAndUpdate(
@@ -122,14 +137,16 @@ exports.updateLeaveGroup = async (req, res) => {
         leaveprivileges: leavePrivilege,
         status: groupStatus,
       },
-      { new: true },
+      { new: true }
     );
 
     if (!updatedLeaveGroup) {
-      return res.status(404).json({ message: 'Leave Group not found' });
+      return res.status(404).json({ message: "Leave Group not found" });
     }
 
-    res.status(200).json({ message: 'Create Success', leave_group: updatedLeaveGroup });
+    res
+      .status(200)
+      .json({ message: "Create Success", leave_group: updatedLeaveGroup });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
@@ -145,11 +162,11 @@ exports.deleteLeaveGroup = async (req, res) => {
       const company_id = await LeaveGroupModel.findByIdAndDelete(id);
 
       if (!company_id) {
-        throw new Error('Delete failed');
+        throw new Error("Delete failed");
       }
     }
 
-    res.json({ message: 'Delete Successfully' });
+    res.json({ message: "Delete Successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });

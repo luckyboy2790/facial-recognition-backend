@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 /**
@@ -7,20 +7,24 @@ const Schema = mongoose.Schema;
 const leaveGroupSchema = new Schema({
   group_name: {
     type: String,
-    required: [true, 'Group Name not provided'],
+    required: [true, "Group Name not provided"],
   },
   description: {
     type: String,
-    required: [true, 'Description not provided'],
+    required: [true, "Description not provided"],
+  },
+  company: {
+    type: Schema.Types.ObjectId,
+    required: [true, "Company not provided"],
   },
   leaveprivileges: {
     type: [Schema.Types.ObjectId],
-    required: [true, 'Leave Types not provided'],
+    required: [true, "Leave Types not provided"],
   },
   status: {
     type: String,
-    required: [true, 'status not provided'],
+    required: [true, "status not provided"],
   },
 });
 
-module.exports = mongoose.model('LeaveGroup', leaveGroupSchema);
+module.exports = mongoose.model("LeaveGroup", leaveGroupSchema);
