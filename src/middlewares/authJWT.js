@@ -17,7 +17,11 @@ const verifyToken = async (req, res, next) => {
       }
 
       const userWithEmployeeData = await User.aggregate([
-        { $match: { email: decoded.id } },
+        {
+          $match: {
+            $or: [{ _id: decoded.id }, { email: decoded.email }],
+          },
+        },
         {
           $lookup: {
             from: "employees",

@@ -1,6 +1,7 @@
 const SettingModel = require("../models/setting.model");
 const EmployeeModel = require("../models/employee.model");
 const UserModel = require("../models/user.model");
+const bcrypt = require("bcryptjs");
 
 exports.setSetting = async (req, res) => {
   try {
@@ -94,6 +95,34 @@ exports.accountSetting = async (req, res) => {
     res
       .status(200)
       .json({ message: "Create successfully", user: userResponse });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    const { id } = req.params;
+
+    const user = await UserModel.findById(id);
+
+    let passwordIsValid = bcrypt.compareSync(currentPassword, user.password);
+
+    if (!passwordIsValid) {
+      return res.status(401).send({
+        accessToken: null,
+        message: "Invalid Password!",
+      });
+    }
+
+    await UserModel.findByIdAndUpdate(id, {
+      password: bcrypt.hashSync(newPassword, 8),
+    });
+
+    res.status(200).json({ message: "Change Password Successfully." });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
