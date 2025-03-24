@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 /**
@@ -7,12 +7,16 @@ const Schema = mongoose.Schema;
 const JobTitleSchema = new Schema({
   job_title: {
     type: String,
-    required: [true, 'Job title not provided'],
+    required: [true, "Job title not provided"],
   },
   department_id: {
     type: Schema.Types.ObjectId,
-    required: [true, 'JobTitle name not provided'],
+    required: [true, "JobTitle name not provided"],
+  },
+  company: {
+    type: Schema.Types.ObjectId,
+    required: [true, "Company not provided"],
   },
 });
 
-module.exports = mongoose.model('Job_title', JobTitleSchema);
+module.exports = mongoose.model("Job_title", JobTitleSchema);
