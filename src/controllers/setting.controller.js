@@ -90,6 +90,7 @@ exports.accountSetting = async (req, res) => {
       full_name: `${first_name} ${last_name}`,
       account_type: user.account_type,
       img: employee?.img || null,
+      company: employee?.company_id || null,
     };
 
     res

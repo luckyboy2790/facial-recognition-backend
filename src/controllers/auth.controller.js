@@ -77,6 +77,7 @@ exports.signin = (req, res) => {
           full_name: employeeData?.full_name,
           account_type: user.account_type,
           img: employeeData?.img || null,
+          company: employeeData.company_id || null,
         },
         message: "Login successfull",
         accessToken: token,
