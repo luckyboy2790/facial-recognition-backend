@@ -9,10 +9,18 @@ const { encrypt, decrypt } = require("../middlewares/cryptFunction");
 
 exports.getTotalFieldsData = async (req, res) => {
   try {
+    let filter = {};
+
+    if (req.user.account_type === "Admin") {
+      filter.company = req.user.employeeData.company_id;
+    }
+
+    console.log(filter);
+
     const company = await CompanyModel.find({});
-    const department = await DepartmentModel.find({});
-    const jobTitle = await JobTitleModel.find({});
-    const leaveGroup = await LeaveGroupModel.find({});
+    const department = await DepartmentModel.find(filter);
+    const jobTitle = await JobTitleModel.find(filter);
+    const leaveGroup = await LeaveGroupModel.find(filter);
 
     res.json({ company, department, jobTitle, leaveGroup });
   } catch (error) {
@@ -123,7 +131,6 @@ exports.getEmployee = async (req, res) => {
 
     const filter = {
       _id: { $ne: user.employee },
-      employee_status: "Active",
     };
 
     if (query) {
