@@ -1,7 +1,7 @@
 const CompanyModel = require("../models/company.model");
 const DepartmentModel = require("../models/department.model");
 const JobTitleModel = require("../models/jobTitile.model");
-const LeaveGroupModel = require("../models/leaveGroup.model");
+const ScheduleModel = require("../models/schedule.model");
 const EmployeeModel = require("../models/employee.model");
 const AttendanceModel = require("../models/attendance.model");
 const EmployeeLeaveModel = require("../models/employeeLeave.model");
@@ -420,6 +420,242 @@ exports.getDashboardCardData = async (req, res) => {
     };
 
     res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getPersonalDashboardData = async (req, res) => {
+  try {
+    let attendanceFilter = { employee: req.user.employee };
+
+    const attendancePipeline = [
+      {
+        $lookup: {
+          from: "employees",
+          localField: "employee",
+          foreignField: "_id",
+          as: "employeeData",
+        },
+      },
+      {
+        $unwind: { path: "$employeeData", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 1,
+          employee: 1,
+          date: 1,
+          total_hours: 1,
+          status_timein: 1,
+          status_timeout: 1,
+          time_in: 1,
+          time_out: 1,
+          reason: 1,
+          comment: 1,
+          "employeeData.company_id": 1,
+          "employeeData.full_name": 1,
+          time_in_24: {
+            $cond: {
+              if: { $or: [{ $eq: ["$time_in", ""] }, { $not: ["$time_in"] }] },
+              then: null,
+              else: {
+                $dateToString: {
+                  format: "%H:%M:%S",
+                  date: { $toDate: "$time_in" },
+                },
+              },
+            },
+          },
+          time_out_24: {
+            $cond: {
+              if: {
+                $or: [{ $eq: ["$time_out", ""] }, { $not: ["$time_out"] }],
+              },
+              then: null,
+              else: {
+                $dateToString: {
+                  format: "%H:%M:%S",
+                  date: { $toDate: "$time_out" },
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $match: attendanceFilter,
+      },
+      {
+        $sort: {
+          date: -1,
+        },
+      },
+      {
+        $limit: 5,
+      },
+    ];
+
+    const attendanceData = await AttendanceModel.aggregate(attendancePipeline);
+
+    const attendance = attendanceData
+      .map((item, key) => {
+        const attendanceRecords = [];
+
+        if (item.time_in_24 && item.time_in_24 !== null) {
+          attendanceRecords.push({
+            _id: item._id + item.time_in_24,
+            full_name: item.employeeData.full_name,
+            type: "Time In",
+            date: item.date,
+            originalTime: item.time_in,
+            time: item.time_in_24,
+          });
+        }
+
+        if (item.time_out_24 && item.time_out_24 !== null) {
+          attendanceRecords.push({
+            _id: item._id + item.time_out_24,
+            full_name: item.employeeData.full_name,
+            type: "Time Out",
+            date: item.date,
+            originalTime: item.time_out,
+            time: item.time_out_24,
+          });
+        }
+
+        return attendanceRecords;
+      })
+      .flat();
+
+    const parseTime = (timeString) => {
+      return new Date(timeString);
+    };
+
+    const sortedAttendance = attendance.sort((a, b) => {
+      const timeA = parseTime(a.originalTime);
+      const timeB = parseTime(b.originalTime);
+      return timeB - timeA;
+    });
+
+    const top5Attendance = sortedAttendance.slice(0, 5);
+
+    const pipeline = [
+      {
+        $lookup: {
+          from: "employees",
+          localField: "employee",
+          foreignField: "_id",
+          as: "employee_data",
+        },
+      },
+      {
+        $unwind: { path: "$employee_data", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $match: { employee: req.user.employee },
+      },
+      {
+        $sort: {
+          from: -1,
+        },
+      },
+    ];
+
+    const scheduleData = await ScheduleModel.aggregate(pipeline);
+
+    const leavePipeline = [
+      {
+        $lookup: {
+          from: "leavetypes",
+          localField: "leaveType",
+          foreignField: "_id",
+          as: "leaveTypeData",
+        },
+      },
+      {
+        $lookup: {
+          from: "employees",
+          localField: "employee",
+          foreignField: "_id",
+          as: "employeeData",
+        },
+      },
+      {
+        $unwind: { path: "$leaveTypeData", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $unwind: { path: "$employeeData", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $match: {
+          employee: req.user.employee,
+        },
+      },
+      {
+        $sort: {
+          leaveReturn: -1,
+        },
+      },
+    ];
+
+    const leaveData = await EmployeeLeaveModel.aggregate(leavePipeline);
+
+    const responseData = {
+      "Recent Attendances": top5Attendance,
+      "Previous Schedules": scheduleData,
+      "Recent Leaves of Absence": leaveData,
+    };
+
+    res.status(200).json(responseData);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getPersonalDashboardCardData = async (req, res) => {
+  try {
+    const lateArrivals = await AttendanceModel.find({
+      employee: req.user.employee,
+      time_in: "Late In",
+    }).countDocuments();
+
+    const earlyDepartures = await AttendanceModel.find({
+      employee: req.user.employee,
+      time_out: "Early Out",
+    }).countDocuments();
+
+    const currentDate = new Date();
+
+    const today = currentDate.toISOString().split("T")[0];
+
+    const recentSchedule = await ScheduleModel.findOne({
+      employee: req.user.employee,
+      from: { $lte: today },
+      to: { $gte: today },
+    });
+
+    const approvedLeave = await EmployeeLeaveModel.find({
+      employee: req.user.employee,
+      status: "Approved",
+    }).countDocuments();
+
+    const pendingLeave = await EmployeeLeaveModel.find({
+      employee: req.user.employee,
+      status: "Pending",
+    }).countDocuments();
+
+    const responseData = {
+      lateArrivals,
+      earlyDepartures,
+      recentSchedule,
+      approvedLeave,
+      pendingLeave,
+    };
+
+    res.status(200).json(responseData);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
