@@ -44,7 +44,7 @@ createInitialUserData();
 app.use(
   cors({
     origin: [
-      "https://facial-recognition-frontend.vercel.app/",
+      "https://facial-recognition-frontend.vercel.app",
       "http://localhost:3000",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
