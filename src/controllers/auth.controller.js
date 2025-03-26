@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user.model");
 const EmployeeModel = require("../models/employee.model");
+const UserRoleModel = require("../models/role.model");
 
 exports.signup = (req, res) => {
   const { employee, email, status, account_type, role, password } = req.body;
@@ -70,6 +71,8 @@ exports.signin = (req, res) => {
 
       const employeeData = await EmployeeModel.findById(user.employee);
 
+      const roleData = await UserRoleModel.findOne({ _id: user.role });
+
       res.status(200).send({
         user: {
           _id: user._id,
@@ -78,6 +81,7 @@ exports.signin = (req, res) => {
           account_type: user.account_type,
           img: employeeData?.img || null,
           company: employeeData.company_id || null,
+          role: roleData?.accessRight,
         },
         message: "Login successfull",
         accessToken: token,
