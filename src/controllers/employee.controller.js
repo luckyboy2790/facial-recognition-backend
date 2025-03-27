@@ -60,6 +60,14 @@ exports.createEmployee = async (req, res) => {
       faceDescriptor,
     } = req.body;
 
+    const existingEmployee = await EmployeeModel.findOne({ email });
+
+    if (existingEmployee) {
+      return res
+        .status(400)
+        .json({ error: `Employee with email ${email} already exists` });
+    }
+
     if (!faceDescriptor || !Array.isArray(faceDescriptor)) {
       return res
         .status(400)
@@ -144,8 +152,9 @@ exports.getEmployee = async (req, res) => {
       ];
     }
 
-    if (req.user.account_type === "Admin") {
-      filter.company_id = req.user.employeeData.company_id;
+    if (req.user.account_type === "Admin" && req.user.employeeData) {
+      filter.company_id = req.user.employeeData?.company_id;
+      filter._id = { ...filter._id, $ne: req.user.employee };
     }
 
     const pipeline = [
@@ -464,7 +473,6 @@ exports.getTotalEmployee = async (req, res) => {
 
     const filter = {
       _id: { $ne: user.employee },
-      employee_status: "Active",
     };
 
     if (req.user.account_type === "Admin") {
