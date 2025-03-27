@@ -45,7 +45,7 @@ app.use(
   cors({
     origin: [
       "https://facial-recognition-frontend.vercel.app",
-      "http://localhost:3000",
+      "http://localhost:5173",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
