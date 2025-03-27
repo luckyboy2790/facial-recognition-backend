@@ -230,8 +230,6 @@ exports.getEmployeeDetail = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const loggedInEmployeeId = req.user.employee;
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid employee ID" });
     }
@@ -375,7 +373,7 @@ exports.updateEmployee = async (req, res) => {
       official_start_date: officialStartDate,
       date_regularized: dateRegularized,
       face_info: {
-        name: `${firstName} ${lastName}`,
+        name: `${_id}`,
         descriptors: [faceDescriptor],
       },
       pin: encrypt(pin),
