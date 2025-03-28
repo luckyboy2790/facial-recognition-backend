@@ -110,8 +110,8 @@ exports.createAttendance = async (req, res) => {
         "YYYY-MM-DD HH:mm:ss"
       );
 
-      const duration = moment.duration(timeOutMoment.diff(timeInMoment));
-      let totalHours = duration.asMinutes() / 60;
+      let totalHours =
+        moment.duration(timeOutMoment.diff(timeInMoment)).asMinutes() / 60; // Changed to let
 
       if (break_in && break_out) {
         const breakInMoment = moment(
@@ -128,7 +128,7 @@ exports.createAttendance = async (req, res) => {
         );
         const breakHours = breakDuration.asMinutes() / 60;
 
-        totalHours -= breakHours;
+        totalHours -= breakHours; // Now this works
       }
 
       total_hours = totalHours.toFixed(1);
@@ -341,14 +341,20 @@ exports.getAttendanceDetail = async (req, res) => {
 
 exports.updateAttendance = async (req, res) => {
   try {
-    console.log(req.body);
-
     const { id } = req.params;
+
+    const existAttendance = await AttendanceModel.findById(id);
+
+    if (!existAttendance) {
+      return res.status(404).json({
+        message: "There is no attendance data for this employee.",
+      });
+    }
 
     const { employee, date, time_in, time_out, reason, break_in, break_out } =
       req.body;
 
-    console.log(time_out);
+    console.log(req.body);
 
     if (time_in === "") {
       return res.status(500).json({
@@ -439,8 +445,8 @@ exports.updateAttendance = async (req, res) => {
         "YYYY-MM-DD HH:mm:ss"
       );
 
-      const duration = moment.duration(timeOutMoment.diff(timeInMoment));
-      const totalHours = duration.asMinutes() / 60;
+      let totalHours =
+        moment.duration(timeOutMoment.diff(timeInMoment)).asMinutes() / 60;
 
       if (break_in && break_out) {
         const breakInMoment = moment(
@@ -468,6 +474,8 @@ exports.updateAttendance = async (req, res) => {
       date,
       time_in: formattedTimeIn,
       time_out: formattedTimeOut,
+      break_in: formattedBreakIn,
+      break_out: formattedBreakOut,
       total_hours,
       status_timein,
       status_timeout,
@@ -507,6 +515,8 @@ exports.checkOutAttendance = async (req, res) => {
   try {
     const { id } = req.params;
 
+    console.log(id);
+
     const now = new Date();
 
     const date = now.toISOString().split("T")[0];
@@ -516,8 +526,8 @@ exports.checkOutAttendance = async (req, res) => {
       date,
     });
 
-    if (attendanceData.length <= 0) {
-      res
+    if (!attendanceData || attendanceData?.length <= 0) {
+      return res
         .status(400)
         .send({ message: "There is no attendance data for this employee." });
     }
@@ -690,5 +700,76 @@ exports.getPersonalAttendance = async (req, res) => {
   } catch (error) {
     console.error("Error getting attendance records:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+exports.recordBreakTime = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { employee, date, break_in, break_out } = req.body;
+
+    const existAttendance = await AttendanceModel.findById(id);
+
+    if (!existAttendance) {
+      return res.status(404).json({
+        message: "There is no attendance data for this employee.",
+      });
+    }
+
+    if (existAttendance.time_out || existAttendance.time_out !== "") {
+      return res.status(404).json({
+        message: "This employee has already left work.",
+      });
+    }
+
+    if (
+      (existAttendance.break_in || existAttendance.break_in !== "") &&
+      (existAttendance.break_out || existAttendance.break_out !== "")
+    ) {
+      return res.status(404).json({
+        message: "This employee has already taken a break.",
+      });
+    }
+
+    if (existAttendance.break_out || existAttendance.break_out !== "") {
+      return res.status(404).json({
+        message: "This employee has already finished his break.",
+      });
+    }
+
+    const employeeSchedule = await EmployeeScheduleModel.findOne({
+      employee: employee,
+      status: "Present",
+      from: { $lte: date },
+      to: { $gte: date },
+    });
+
+    if (!employeeSchedule) {
+      return res.status(400).json({
+        message: "No active schedule found for this employee.",
+      });
+    }
+
+    const formattedBreakIn = break_in
+      ? moment(`${date} ${break_in}`).format("YYYY-MM-DD hh:mm:ss A")
+      : "";
+    const formattedBreakOut = break_out
+      ? moment(`${date} ${break_out}`).format("YYYY-MM-DD hh:mm:ss A")
+      : "";
+
+    const scheduleId = await AttendanceModel.findByIdAndUpdate(id, {
+      employee,
+      date,
+      break_in: formattedBreakIn,
+      break_out: formattedBreakOut,
+    });
+
+    res
+      .status(200)
+      .json({ message: "Schedule created successfully", schedule: scheduleId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
   }
 };
