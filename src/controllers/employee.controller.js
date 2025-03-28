@@ -571,15 +571,15 @@ exports.pinCheckOutAttendance = async (req, res) => {
     const employee = await Employee.findOne({ email: req.body.email });
 
     if (!employee) {
-      return res.status(404).json({ error: "Employee not found" });
+      return res.status(404).json({ message: "Employee not found" });
     }
 
     const decryptedPin = decrypt(employee.pin);
 
     if (decryptedPin === pin) {
-      return res.status(200).send(employee);
+      return res.status(200).json(employee);
     } else {
-      return res.status(400).json({ error: "Invalid PIN" });
+      return res.status(400).json({ message: "Invalid PIN" });
     }
   } catch (error) {
     console.log(error);
