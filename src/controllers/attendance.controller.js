@@ -1,11 +1,12 @@
 const AttendanceModel = require("../models/attendance.model");
 const EmployeeScheduleModel = require("../models/schedule.model");
-const mongoose = require("mongoose");
 const moment = require("moment");
 
 exports.createAttendance = async (req, res) => {
   try {
     const { employee, date, time_in, time_out, break_in, break_out } = req.body;
+
+    console.log(req.body);
 
     const existEmployee = await AttendanceModel.findOne({
       employee: employee,
@@ -111,7 +112,7 @@ exports.createAttendance = async (req, res) => {
       );
 
       let totalHours =
-        moment.duration(timeOutMoment.diff(timeInMoment)).asMinutes() / 60; // Changed to let
+        moment.duration(timeOutMoment.diff(timeInMoment)).asMinutes() / 60;
 
       if (break_in && break_out) {
         const breakInMoment = moment(
@@ -128,7 +129,7 @@ exports.createAttendance = async (req, res) => {
         );
         const breakHours = breakDuration.asMinutes() / 60;
 
-        totalHours -= breakHours; // Now this works
+        totalHours -= breakHours;
       }
 
       total_hours = totalHours.toFixed(1);

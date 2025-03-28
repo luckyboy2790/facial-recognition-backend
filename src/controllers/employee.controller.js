@@ -6,6 +6,7 @@ const LeaveGroupModel = require("../models/leaveGroup.model");
 const EmployeeModel = require("../models/employee.model");
 const UserModel = require("../models/user.model");
 const { encrypt, decrypt } = require("../middlewares/cryptFunction");
+const Employee = require("../models/employee.model");
 
 exports.getTotalFieldsData = async (req, res) => {
   try {
@@ -560,5 +561,28 @@ exports.getTotalEmployeeFaceInfo = async (req, res) => {
   } catch (error) {
     console.error("Error fetching employee face info:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+exports.pinCheckOutAttendance = async (req, res) => {
+  try {
+    const { pin } = req.body;
+
+    const employee = await Employee.findOne({ email: req.body.email });
+
+    if (!employee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    const decryptedPin = decrypt(employee.pin);
+
+    if (decryptedPin === pin) {
+      return res.status(200).send(employee);
+    } else {
+      return res.status(400).json({ error: "Invalid PIN" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
   }
 };
