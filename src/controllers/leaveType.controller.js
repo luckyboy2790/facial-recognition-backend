@@ -1,6 +1,6 @@
 const LeaveTypeModel = require("../models/leaveType.model");
 
-exports.createJobTitle = async (req, res) => {
+exports.createLeaveType = async (req, res) => {
   try {
     const { leaveName, company } = req.body;
 
@@ -17,7 +17,7 @@ exports.createJobTitle = async (req, res) => {
   }
 };
 
-exports.getJobTitle = async (req, res) => {
+exports.getLeaveType = async (req, res) => {
   try {
     console.log(req.query);
 
@@ -74,7 +74,7 @@ exports.getJobTitle = async (req, res) => {
   }
 };
 
-exports.deleteJobTitle = async (req, res) => {
+exports.deleteLeaveType = async (req, res) => {
   try {
     console.log(req.body);
     const data = req.body;

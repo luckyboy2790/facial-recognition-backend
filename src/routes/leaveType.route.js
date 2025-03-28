@@ -1,14 +1,14 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const {
-  createJobTitle,
-  getJobTitle,
-  deleteJobTitle,
-} = require('../controllers/leaveType.controller');
-const verifyToken = require('../middlewares/authJWT');
+  createLeaveType,
+  getLeaveType,
+  deleteLeaveType,
+} = require("../controllers/leaveType.controller");
+const verifyToken = require("../middlewares/authJWT");
 
-router.post('/create', verifyToken, createJobTitle);
-router.get('/', verifyToken, getJobTitle);
-router.post('/delete', verifyToken, deleteJobTitle);
+router.post("/create", verifyToken, createLeaveType);
+router.get("/", verifyToken, getLeaveType);
+router.post("/delete", verifyToken, deleteLeaveType);
 
 module.exports = router;
