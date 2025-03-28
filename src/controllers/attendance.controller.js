@@ -5,9 +5,7 @@ const moment = require("moment");
 
 exports.createAttendance = async (req, res) => {
   try {
-    console.log(req.body);
-
-    const { employee, date, time_in, time_out } = req.body;
+    const { employee, date, time_in, time_out, break_in, break_out } = req.body;
 
     const existEmployee = await AttendanceModel.findOne({
       employee: employee,
@@ -58,8 +56,17 @@ exports.createAttendance = async (req, res) => {
     const formattedTimeIn = time_in
       ? moment(`${date} ${time_in}`).format("YYYY-MM-DD hh:mm:ss A")
       : "";
+
     const formattedTimeOut = time_out
       ? moment(`${date} ${time_out}`).format("YYYY-MM-DD hh:mm:ss A")
+      : "";
+
+    const formattedBreakIn = break_in
+      ? moment(`${date} ${break_in}`).format("YYYY-MM-DD hh:mm:ss A")
+      : "";
+
+    const formattedBreakOut = break_out
+      ? moment(`${date} ${break_out}`).format("YYYY-MM-DD hh:mm:ss A")
       : "";
 
     let status_timein = "";
@@ -104,7 +111,25 @@ exports.createAttendance = async (req, res) => {
       );
 
       const duration = moment.duration(timeOutMoment.diff(timeInMoment));
-      const totalHours = duration.asMinutes() / 60;
+      let totalHours = duration.asMinutes() / 60;
+
+      if (break_in && break_out) {
+        const breakInMoment = moment(
+          `${date} ${break_in}`,
+          "YYYY-MM-DD HH:mm:ss"
+        );
+        const breakOutMoment = moment(
+          `${date} ${break_out}`,
+          "YYYY-MM-DD HH:mm:ss"
+        );
+
+        const breakDuration = moment.duration(
+          breakOutMoment.diff(breakInMoment)
+        );
+        const breakHours = breakDuration.asMinutes() / 60;
+
+        totalHours -= breakHours;
+      }
 
       total_hours = totalHours.toFixed(1);
     }
@@ -114,6 +139,8 @@ exports.createAttendance = async (req, res) => {
       date,
       time_in: formattedTimeIn,
       time_out: formattedTimeOut,
+      break_in: formattedBreakIn,
+      break_out: formattedBreakOut,
       total_hours,
       status_timein,
       status_timeout,
@@ -217,6 +244,34 @@ exports.getAttendance = async (req, res) => {
               },
             },
           },
+          break_in_24: {
+            $cond: {
+              if: {
+                $or: [{ $eq: ["$break_in", ""] }, { $not: ["$break_in"] }],
+              },
+              then: null,
+              else: {
+                $dateToString: {
+                  format: "%H:%M:%S",
+                  date: { $toDate: "$break_in" },
+                },
+              },
+            },
+          },
+          break_out_24: {
+            $cond: {
+              if: {
+                $or: [{ $eq: ["$break_out", ""] }, { $not: ["$break_out"] }],
+              },
+              then: null,
+              else: {
+                $dateToString: {
+                  format: "%H:%M:%S",
+                  date: { $toDate: "$break_out" },
+                },
+              },
+            },
+          },
         },
       },
       {
@@ -248,6 +303,12 @@ exports.getAttendance = async (req, res) => {
         : null,
       time_out: record.time_out_24
         ? moment(record.time_out_24, "HH:mm:ss").format("hh:mm:ss A")
+        : null,
+      break_in: record.break_in_24
+        ? moment(record.break_in_24, "HH:mm:ss").format("hh:mm:ss A")
+        : null,
+      break_out: record.break_out_24
+        ? moment(record.break_out_24, "HH:mm:ss").format("hh:mm:ss A")
         : null,
     }));
 
@@ -284,7 +345,8 @@ exports.updateAttendance = async (req, res) => {
 
     const { id } = req.params;
 
-    const { employee, date, time_in, time_out, reason } = req.body;
+    const { employee, date, time_in, time_out, reason, break_in, break_out } =
+      req.body;
 
     console.log(time_out);
 
@@ -328,6 +390,12 @@ exports.updateAttendance = async (req, res) => {
       : "";
     const formattedTimeOut = time_out
       ? moment(`${date} ${time_out}`).format("YYYY-MM-DD hh:mm:ss A")
+      : "";
+    const formattedBreakIn = break_in
+      ? moment(`${date} ${break_in}`).format("YYYY-MM-DD hh:mm:ss A")
+      : "";
+    const formattedBreakOut = break_out
+      ? moment(`${date} ${break_out}`).format("YYYY-MM-DD hh:mm:ss A")
       : "";
 
     let status_timein = "";
@@ -373,6 +441,24 @@ exports.updateAttendance = async (req, res) => {
 
       const duration = moment.duration(timeOutMoment.diff(timeInMoment));
       const totalHours = duration.asMinutes() / 60;
+
+      if (break_in && break_out) {
+        const breakInMoment = moment(
+          `${date} ${break_in}`,
+          "YYYY-MM-DD HH:mm:ss"
+        );
+        const breakOutMoment = moment(
+          `${date} ${break_out}`,
+          "YYYY-MM-DD HH:mm:ss"
+        );
+
+        const breakDuration = moment.duration(
+          breakOutMoment.diff(breakInMoment)
+        );
+        const breakHours = breakDuration.asMinutes() / 60;
+
+        totalHours -= breakHours;
+      }
 
       total_hours = totalHours.toFixed(1);
     }
@@ -531,6 +617,34 @@ exports.getPersonalAttendance = async (req, res) => {
               },
             },
           },
+          break_in_24: {
+            $cond: {
+              if: {
+                $or: [{ $eq: ["$break_in", ""] }, { $not: ["$break_in"] }],
+              },
+              then: null,
+              else: {
+                $dateToString: {
+                  format: "%H:%M:%S",
+                  date: { $toDate: "$break_in" },
+                },
+              },
+            },
+          },
+          break_out_24: {
+            $cond: {
+              if: {
+                $or: [{ $eq: ["$break_out", ""] }, { $not: ["$break_out"] }],
+              },
+              then: null,
+              else: {
+                $dateToString: {
+                  format: "%H:%M:%S",
+                  date: { $toDate: "$break_out" },
+                },
+              },
+            },
+          },
         },
       },
       {
@@ -559,6 +673,12 @@ exports.getPersonalAttendance = async (req, res) => {
         : null,
       time_out: record.time_out_24
         ? moment(record.time_out_24, "HH:mm:ss").format("hh:mm:ss A")
+        : null,
+      break_in: record.break_in_24
+        ? moment(record.break_in_24, "HH:mm:ss").format("hh:mm:ss A")
+        : null,
+      break_out: record.break_out_24
+        ? moment(record.break_out_24, "HH:mm:ss").format("hh:mm:ss A")
         : null,
     }));
 
