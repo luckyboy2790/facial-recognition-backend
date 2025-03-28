@@ -106,6 +106,22 @@ exports.createEmployee = async (req, res) => {
       date_regularized: dateRegularized,
     });
 
+    const employees = await EmployeeModel.find({});
+
+    let existPin = false;
+
+    for (let employee of employees) {
+      if (decrypt(employee.pin) === pin) {
+        existPin = true;
+      }
+    }
+
+    if (existPin) {
+      return res.status(400).json({
+        message: "The PIN exists. Please check again.",
+      });
+    }
+
     const savedEmployee = await newEmployee.save();
 
     savedEmployee.face_info = {
@@ -568,19 +584,23 @@ exports.pinCheckOutAttendance = async (req, res) => {
   try {
     const { pin } = req.body;
 
-    const employee = await Employee.findOne({ email: req.body.email });
+    const employees = await Employee.find();
 
-    if (!employee) {
-      return res.status(404).json({ message: "Employee not found" });
+    let existEmployee = null;
+
+    for (let employee of employees) {
+      if (decrypt(employee.pin) === pin) {
+        existEmployee = employee;
+
+        break;
+      }
     }
 
-    const decryptedPin = decrypt(employee.pin);
-
-    if (decryptedPin === pin) {
-      return res.status(200).json(employee);
-    } else {
-      return res.status(400).json({ message: "Invalid PIN" });
+    if (!existEmployee) {
+      return res.status(404).json({ message: "Invalid PIN" });
     }
+
+    return res.status(200).json(existEmployee);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
