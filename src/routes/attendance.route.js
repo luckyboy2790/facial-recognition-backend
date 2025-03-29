@@ -9,6 +9,7 @@ const {
   checkOutAttendance,
   getPersonalAttendance,
   recordBreakTime,
+  getTotalAttendance,
 } = require("../controllers/attendance.controller");
 
 const verifyToken = require("../middlewares/authJWT");
@@ -20,6 +21,7 @@ router.post("/update_attendance/:id", verifyToken, updateAttendance);
 router.post("/delete_attendance", verifyToken, deleteAttendance);
 router.get("/checkout_attendance/:id", verifyToken, checkOutAttendance);
 router.post("/record_break/:id", verifyToken, recordBreakTime);
+router.get("/total_attendance", verifyToken, getTotalAttendance);
 
 router.get("/personal/get_attendance", verifyToken, getPersonalAttendance);
 
