@@ -40,17 +40,17 @@ app.set("trust proxy", true);
 
 createInitialUserData();
 
-// app.use(cors({}));
-app.use(
-  cors({
-    origin: [
-      "https://facial-recognition-frontend.vercel.app",
-      "http://localhost:5173",
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
+app.use(cors({}));
+// app.use(
+//   cors({
+//     origin: [
+//       "https://facial-recognition-frontend.vercel.app",
+//       "http://localhost:5173",
+//     ],
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//     credentials: true,
+//   })
+// );
 
 app.use(express.json());
 app.use(
