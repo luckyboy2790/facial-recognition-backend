@@ -73,6 +73,8 @@ const createInitialSettingData = async () => {
         ipRestriction: "",
       });
 
+      console.log(settingData);
+
       await settingData.save();
     }
   } catch (error) {
