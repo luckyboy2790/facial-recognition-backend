@@ -584,12 +584,12 @@ exports.pinCheckOutAttendance = async (req, res) => {
   try {
     const { pin } = req.body;
 
-    const employees = await Employee.find();
-
-    let existEmployee = null;
+    const employees = await Employee.find({
+      account_type: { $ne: "SuperAdmin" },
+    });
 
     for (let employee of employees) {
-      if (decrypt(employee.pin) === pin) {
+      if (decrypt(employee?.pin) === pin) {
         existEmployee = employee;
 
         break;

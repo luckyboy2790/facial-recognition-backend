@@ -6,14 +6,8 @@ const bcrypt = require("bcryptjs");
 exports.setSetting = async (req, res) => {
   try {
     console.log(req.body);
-    const {
-      country,
-      timezone,
-      timeFormat,
-      rfidClock,
-      timeInComments,
-      ipRestriction,
-    } = req.body;
+    const { country, timezone, timeFormat, rfidClock, ipRestriction } =
+      req.body;
 
     const { id } = req.params;
 
@@ -25,7 +19,6 @@ exports.setSetting = async (req, res) => {
         timezone,
         timeFormat,
         rfidClock,
-        timeInComments,
         ipRestriction,
       });
     } else {
@@ -34,7 +27,6 @@ exports.setSetting = async (req, res) => {
         timezone,
         timeFormat,
         rfidClock,
-        timeInComments,
         ipRestriction,
       });
 

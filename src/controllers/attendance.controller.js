@@ -6,6 +6,8 @@ exports.createAttendance = async (req, res) => {
   try {
     const { employee, date, time_in, time_out, break_in, break_out } = req.body;
 
+    console.log(time_in);
+
     const existEmployee = await AttendanceModel.findOne({
       employee: employee,
       date: date,
@@ -55,6 +57,8 @@ exports.createAttendance = async (req, res) => {
     const formattedTimeIn = time_in
       ? moment(`${date} ${time_in}`).format("YYYY-MM-DD hh:mm:ss A")
       : "";
+
+    console.log(formattedTimeIn);
 
     const formattedTimeOut = time_out
       ? moment(`${date} ${time_out}`).format("YYYY-MM-DD hh:mm:ss A")

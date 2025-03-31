@@ -63,19 +63,14 @@ const createInitialSettingData = async () => {
   try {
     const existSettingData = await SettingModel.find({});
 
-    console.log(existSettingData);
-
     if (existSettingData.length === 0) {
       const settingData = new SettingModel({
         country: "UK",
         timezone: "Europe/Lisbon",
         timeFormat: "1",
         rfidClock: false,
-        timeInComments: false,
         ipRestriction: "",
       });
-
-      console.log(settingData);
 
       await settingData.save();
     }
