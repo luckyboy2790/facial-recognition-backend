@@ -16,9 +16,11 @@ const settingSchema = new Schema({
   },
   rfidClock: {
     type: Boolean,
+    default: false
   },
   timeInComments: {
     type: Boolean,
+    default: false
   },
   ipRestriction: {
     type: String,

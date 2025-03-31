@@ -30,7 +30,10 @@ const employeeLeaveRoutes = require("./routes/employeeLeave.route");
 const { connectDB } = require("./config/connect");
 const path = require("path");
 const cors = require("cors");
-const createInitialUserData = require("./middlewares/createInitialData");
+const {
+  createInitialUserData,
+  createInitialSettingData,
+} = require("./middlewares/createInitialData");
 require("dotenv").config();
 const PORT = process.env.PORT || 8080;
 
@@ -39,6 +42,8 @@ connectDB();
 app.set("trust proxy", true);
 
 createInitialUserData();
+
+createInitialSettingData();
 
 app.use(cors({}));
 // app.use(
