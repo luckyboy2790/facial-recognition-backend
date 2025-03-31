@@ -61,7 +61,7 @@ const createInitialUserData = async () => {
 
 const createInitialSettingData = async () => {
   try {
-    const existSettingData = SettingModel.find({});
+    const existSettingData = await SettingModel.find({});
 
     console.log(existSettingData);
 
