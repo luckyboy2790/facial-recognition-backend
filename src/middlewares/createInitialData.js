@@ -63,6 +63,8 @@ const createInitialSettingData = async () => {
   try {
     const existSettingData = SettingModel.find({});
 
+    console.log(existSettingData);
+
     if (existSettingData.length === 0) {
       const settingData = new SettingModel({
         country: "UK",
