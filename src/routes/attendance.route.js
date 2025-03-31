@@ -14,13 +14,13 @@ const {
 
 const verifyToken = require("../middlewares/authJWT");
 
-router.post("/create_attendance", verifyToken, createAttendance);
+router.post("/create_attendance", createAttendance);
 router.get("/get_attendance", verifyToken, getAttendance);
-router.get("/get_attendance/:id", verifyToken, getAttendanceDetail);
-router.post("/update_attendance/:id", verifyToken, updateAttendance);
-router.post("/delete_attendance", verifyToken, deleteAttendance);
-router.get("/checkout_attendance/:id", verifyToken, checkOutAttendance);
-router.post("/record_break/:id", verifyToken, recordBreakTime);
+router.get("/get_attendance/:id", getAttendanceDetail);
+router.post("/update_attendance/:id", updateAttendance);
+router.post("/delete_attendance", deleteAttendance);
+router.get("/checkout_attendance/:id", checkOutAttendance);
+router.post("/record_break/:id", recordBreakTime);
 router.get("/total_attendance", verifyToken, getTotalAttendance);
 
 router.get("/personal/get_attendance", verifyToken, getPersonalAttendance);
