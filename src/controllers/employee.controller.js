@@ -588,6 +588,8 @@ exports.pinCheckOutAttendance = async (req, res) => {
       account_type: { $ne: "SuperAdmin" },
     });
 
+    let existEmployee = null;
+
     for (let employee of employees) {
       if (decrypt(employee?.pin) === pin) {
         existEmployee = employee;
