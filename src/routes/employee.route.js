@@ -17,7 +17,7 @@ const verifyToken = require("../middlewares/authJWT");
 router.get("/total_field", verifyToken, getTotalFieldsData);
 router.post("/create_employee", createEmployee);
 router.get("/", verifyToken, getEmployee);
-router.get("/total_employee", getTotalEmployee);
+router.get("/total_employee", verifyToken, getTotalEmployee);
 router.get("/total_employee_descriptor", getTotalEmployeeFaceInfo);
 router.get("/:id", getEmployeeDetail);
 router.post("/update_employee", updateEmployee);
