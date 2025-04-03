@@ -95,6 +95,8 @@ app.use("/api/setting", settingRoutes);
 
 app.use("/api/leave", employeeLeaveRoutes);
 
+app.use("/api/face", require("./routes/face-register.route"));
+
 app.get("*", (req, res) => {
   res.status(404).send("404! This is an invalid URL.");
 });
