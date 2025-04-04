@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 /**
@@ -7,19 +7,18 @@ const Schema = mongoose.Schema;
 const EmployeeSchema = new Schema({
   first_name: {
     type: String,
-    required: [true, 'First Name not provided'],
+    required: [true, "First Name not provided"],
   },
   last_name: {
     type: String,
-    required: [true, 'First Name not provided'],
+    required: [true, "First Name not provided"],
   },
   full_name: {
     type: String,
-    required: [true, 'First Name not provided'],
   },
   email: {
     type: String,
-    required: [true, 'Email not provided'],
+    required: [true, "Email not provided"],
     unique: true,
   },
   dial_code: {
@@ -44,7 +43,7 @@ const EmployeeSchema = new Schema({
   },
   gender: {
     type: String,
-    enum: ['MALE', 'FEMALE', 'OTHER'],
+    enum: ["MALE", "FEMALE", "OTHER"],
   },
   civil_status: {
     type: String,
@@ -69,15 +68,15 @@ const EmployeeSchema = new Schema({
   },
   company_id: {
     type: Schema.Types.ObjectId,
-    ref: 'Company',
+    ref: "Company",
   },
   department_id: {
     type: Schema.Types.ObjectId,
-    ref: 'Department',
+    ref: "Department",
   },
   job_title_id: {
     type: Schema.Types.ObjectId,
-    ref: 'JobTitle',
+    ref: "JobTitle",
   },
   pin: {
     type: String,
@@ -87,15 +86,15 @@ const EmployeeSchema = new Schema({
   },
   leave_group_id: {
     type: Schema.Types.ObjectId,
-    ref: 'LeaveGroup',
+    ref: "LeaveGroup",
   },
   employee_type: {
     type: String,
   },
   employee_status: {
     type: String,
-    enum: ['Active', 'Archived'],
-    default: 'Active',
+    enum: ["Active", "Archived"],
+    default: "Active",
   },
   official_start_date: {
     type: String,
@@ -105,4 +104,4 @@ const EmployeeSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model('Employee', EmployeeSchema);
+module.exports = mongoose.model("Employee", EmployeeSchema);

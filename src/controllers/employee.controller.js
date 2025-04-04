@@ -55,7 +55,6 @@ exports.createEmployee = async (req, res) => {
       companyEmail,
       leaveGroup,
       employmentType,
-      employmentStatus,
       officialStartDate,
       dateRegularized,
       faceDescriptor,
@@ -101,7 +100,6 @@ exports.createEmployee = async (req, res) => {
       company_email: companyEmail,
       leave_group_id: leaveGroup,
       employee_type: employmentType,
-      employee_status: employmentStatus,
       official_start_date: officialStartDate,
       date_regularized: dateRegularized,
     });
