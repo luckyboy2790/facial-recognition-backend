@@ -5,12 +5,15 @@ const mongoose = require("mongoose");
 
 exports.createRole = async (req, res) => {
   try {
-    const { name, status, accessRight, company } = req.body;
+    const { name, status, accessRight, userType, company } = req.body;
+
+    console.log(userType);
 
     const newRole = new UserRoleModel({
       name: name,
       status: status,
       company: company ? company : req.user.employeeData.company_id,
+      userType: userType,
       accessRight: accessRight,
     });
 
@@ -62,11 +65,12 @@ exports.updateRole = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { name, status, accessRight, company } = req.body;
+    const { name, status, accessRight, userType, company } = req.body;
 
     await UserRoleModel.findByIdAndUpdate(id, {
       name: name,
       status: status,
+      userType: userType,
       company: company ? company : req.user.employeeData.company_id,
       accessRight: accessRight,
     });

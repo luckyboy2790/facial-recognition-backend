@@ -85,6 +85,7 @@ app.use("/api/leave_type", leaveTypeRoute);
 app.use("/api/leave_group", leaveGroupRoute);
 
 app.use("/api/employee", employeeRoute);
+
 app.use("/api/upload-image", uploadRoutes);
 
 app.use("/api/schedule", scheduleRoutes);

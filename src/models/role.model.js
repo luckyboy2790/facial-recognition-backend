@@ -17,6 +17,11 @@ const userRoleSchema = new Schema({
     type: Schema.Types.ObjectId,
     required: [true, "Company not provided"],
   },
+  userType: {
+    type: String,
+    enum: ["admin", "employee"],
+    default: "admin",
+  },
   accessRight: {
     type: Schema.Types.Mixed,
     required: true,
