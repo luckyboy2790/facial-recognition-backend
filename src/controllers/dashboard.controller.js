@@ -617,14 +617,23 @@ exports.getPersonalDashboardData = async (req, res) => {
 
 exports.getPersonalDashboardCardData = async (req, res) => {
   try {
+    const moment = require("moment");
+
+    const current = moment();
+
+    const startOfMonth = current.startOf("month").format("YYYY-MM-DD");
+    const endOfMonth = current.endOf("month").format("YYYY-MM-DD");
+
     const lateArrivals = await AttendanceModel.find({
       employee: req.user.employee,
-      time_in: "Late In",
+      status_timein: "Late In",
+      date: { $gte: startOfMonth, $lte: endOfMonth },
     }).countDocuments();
 
     const earlyDepartures = await AttendanceModel.find({
       employee: req.user.employee,
-      time_out: "Early Out",
+      status_timeout: "Early Out",
+      date: { $gte: startOfMonth, $lte: endOfMonth },
     }).countDocuments();
 
     const currentDate = new Date();
