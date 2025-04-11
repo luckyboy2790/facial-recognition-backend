@@ -134,7 +134,7 @@ exports.createAttendance = async (req, res) => {
         totalHours -= breakHours;
       }
 
-      total_hours = totalHours.toFixed(1);
+      total_hours = totalHours.toFixed(3);
     }
 
     const newAttendance = new AttendanceModel({
@@ -467,7 +467,7 @@ exports.updateAttendance = async (req, res) => {
         totalHours -= breakHours;
       }
 
-      total_hours = totalHours.toFixed(1);
+      total_hours = totalHours.toFixed(3);
     }
 
     const scheduleId = await AttendanceModel.findByIdAndUpdate(id, {
