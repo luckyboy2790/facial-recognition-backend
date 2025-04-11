@@ -16,8 +16,6 @@ exports.getTotalFieldsData = async (req, res) => {
       filter.company = req.user.employeeData.company_id;
     }
 
-    console.log(filter);
-
     const company = await CompanyModel.find({});
     const department = await DepartmentModel.find(filter);
     const jobTitle = await JobTitleModel.find(filter);

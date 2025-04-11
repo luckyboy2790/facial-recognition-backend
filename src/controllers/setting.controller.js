@@ -5,13 +5,10 @@ const bcrypt = require("bcryptjs");
 
 exports.setSetting = async (req, res) => {
   try {
-    console.log(req.body);
     const { country, timezone, timeFormat, rfidClock, ipRestriction } =
       req.body;
 
     const { id } = req.params;
-
-    console.log(id);
 
     if (id && id !== "undefined") {
       await SettingModel.findByIdAndUpdate(id, {
@@ -56,7 +53,6 @@ exports.getSetting = async (req, res) => {
 
 exports.accountSetting = async (req, res) => {
   try {
-    console.log(req.body);
     const { first_name, last_name, email } = req.body;
 
     const { id } = req.params;
@@ -68,8 +64,6 @@ exports.accountSetting = async (req, res) => {
     });
 
     const userEmployeeId = userData.employee;
-
-    console.log(userData);
 
     const employee = await EmployeeModel.findByIdAndUpdate(userEmployeeId, {
       first_name: first_name,

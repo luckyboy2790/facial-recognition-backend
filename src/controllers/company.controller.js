@@ -2,8 +2,6 @@ const CompanyModel = require("../models/company.model");
 
 exports.createCompany = async (req, res) => {
   try {
-    console.log(req.body);
-
     const newCompany = new CompanyModel({
       company_name: req.body.companyName,
     });
@@ -18,8 +16,6 @@ exports.createCompany = async (req, res) => {
 
 exports.getCompany = async (req, res) => {
   try {
-    console.log(req.query);
-
     let { pageIndex, pageSize, query, sort } = req.query;
 
     pageIndex = parseInt(pageIndex) || 1;
@@ -54,7 +50,6 @@ exports.getCompany = async (req, res) => {
 
 exports.deleteCompany = async (req, res) => {
   try {
-    console.log(req.body);
     const data = req.body;
 
     for (let id of data.companies) {

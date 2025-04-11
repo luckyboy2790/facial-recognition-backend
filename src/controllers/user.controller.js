@@ -7,8 +7,6 @@ exports.createRole = async (req, res) => {
   try {
     const { name, status, accessRight, userType, company } = req.body;
 
-    console.log(userType);
-
     const newRole = new UserRoleModel({
       name: name,
       status: status,
@@ -34,8 +32,6 @@ exports.getRole = async (req, res) => {
     if (req.user.account_type === "Admin") {
       filter.company = req.user.employeeData.company_id;
     }
-
-    console.log(filter);
 
     const pipeline = [
       {
@@ -103,8 +99,6 @@ exports.createUser = async (req, res) => {
     const { employee, email, status, account_type, role, password } = req.body;
 
     const existEmployee = await UserModel.findOne({ employee: employee });
-
-    console.log(existEmployee);
 
     if (existEmployee) {
       return res.status(500).json({ message: "Employee exist!" });

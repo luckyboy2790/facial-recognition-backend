@@ -128,8 +128,6 @@ exports.getPersonalEmployeeLeaveDetail = async (req, res) => {
   try {
     const { id } = req.params;
 
-    console.log(id);
-
     if (!id) {
       return res.status(400).json({ message: "Leave ID is required" });
     }

@@ -7,8 +7,6 @@ const mongoose = require("mongoose");
 
 exports.createSchedule = async (req, res) => {
   try {
-    console.log(req.body);
-
     const { employee, start_time, off_time, from, to, total_hours, rest_days } =
       req.body;
 
@@ -136,8 +134,6 @@ exports.getScheduleDetail = async (req, res) => {
   try {
     const { id } = req.params;
 
-    console.log(id);
-
     const schedule = await ScheduleModel.findById(id);
 
     res.status(200).json({
@@ -156,8 +152,6 @@ exports.updateScheduleDetail = async (req, res) => {
 
     const { employee, start_time, off_time, from, to, total_hours, rest_days } =
       req.body;
-
-    console.log(req.body);
 
     const scheduleId = await ScheduleModel.findByIdAndUpdate(id, {
       employee,

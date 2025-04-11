@@ -20,8 +20,6 @@ exports.createJobTitle = async (req, res) => {
 
 exports.getJobTitle = async (req, res) => {
   try {
-    console.log(req.query);
-
     let { pageIndex, pageSize, query, sort } = req.query;
 
     pageIndex = parseInt(pageIndex) || 1;
@@ -119,7 +117,6 @@ exports.getJobTitle = async (req, res) => {
 
 exports.deleteJobTitle = async (req, res) => {
   try {
-    console.log(req.body);
     const data = req.body;
 
     for (let id of data.jobTitles) {

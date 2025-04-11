@@ -2,8 +2,6 @@ const LeaveGroupModel = require("../models/leaveGroup.model");
 
 exports.createLeaveGroup = async (req, res) => {
   try {
-    console.log(req.body);
-
     const {
       leaveGroupName,
       description,
@@ -30,8 +28,6 @@ exports.createLeaveGroup = async (req, res) => {
 
 exports.getLeaveGroup = async (req, res) => {
   try {
-    console.log(req.query);
-
     let { pageIndex, pageSize, query, sort } = req.query;
 
     pageIndex = parseInt(pageIndex) || 1;
@@ -155,7 +151,6 @@ exports.updateLeaveGroup = async (req, res) => {
 
 exports.deleteLeaveGroup = async (req, res) => {
   try {
-    console.log(req.body);
     const data = req.body;
 
     for (let id of data.leaveTypeIds) {

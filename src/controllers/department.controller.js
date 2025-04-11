@@ -78,7 +78,6 @@ exports.getDepartment = async (req, res) => {
 
 exports.deleteDepartment = async (req, res) => {
   try {
-    console.log(req.body);
     const data = req.body;
 
     for (let id of data.companies) {

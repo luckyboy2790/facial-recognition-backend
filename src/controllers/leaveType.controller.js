@@ -19,8 +19,6 @@ exports.createLeaveType = async (req, res) => {
 
 exports.getLeaveType = async (req, res) => {
   try {
-    console.log(req.query);
-
     let { pageIndex, pageSize, query, sort } = req.query;
 
     pageIndex = parseInt(pageIndex) || 1;
@@ -76,7 +74,6 @@ exports.getLeaveType = async (req, res) => {
 
 exports.deleteLeaveType = async (req, res) => {
   try {
-    console.log(req.body);
     const data = req.body;
 
     for (let id of data.leaveTypeIds) {

@@ -30,8 +30,6 @@ const createInitialUserData = async () => {
     employeeId = await newEmployee.save();
   }
 
-  console.log(employeeId);
-
   const initialUserData = {
     email: "jairo.visionam@gmail.com",
     status: "Enabled",
