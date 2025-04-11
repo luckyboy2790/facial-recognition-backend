@@ -69,7 +69,7 @@ exports.getDashboardDataByAdmin = async (req, res) => {
       },
       {
         $sort: {
-          official_start_date: -1,
+          created: -1,
         },
       },
       {
@@ -226,7 +226,7 @@ exports.getDashboardDataByAdmin = async (req, res) => {
       },
       {
         $sort: {
-          leaveReturn: -1,
+          created: -1,
         },
       },
     ];

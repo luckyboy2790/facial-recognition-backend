@@ -102,6 +102,10 @@ const EmployeeSchema = new Schema({
   date_regularized: {
     type: String,
   },
+  created: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model("Employee", EmployeeSchema);

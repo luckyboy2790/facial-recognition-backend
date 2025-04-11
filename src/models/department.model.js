@@ -13,6 +13,10 @@ const departmentSchema = new Schema({
     type: Schema.Types.ObjectId,
     required: [true, "Company not provided"],
   },
+  created: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model("Department", departmentSchema);

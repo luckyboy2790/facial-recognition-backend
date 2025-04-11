@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 /**
@@ -25,12 +25,16 @@ const employeeLeaveSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ['Pending', 'Approved', 'Declined'],
-    default: 'Pending',
+    enum: ["Pending", "Approved", "Declined"],
+    default: "Pending",
   },
   comment: {
     type: String,
   },
+  created: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-module.exports = mongoose.model('employeeLeave', employeeLeaveSchema);
+module.exports = mongoose.model("employeeLeave", employeeLeaveSchema);

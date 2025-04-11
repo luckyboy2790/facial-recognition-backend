@@ -40,6 +40,10 @@ const attendanceModel = new Schema({
   reason: {
     type: String,
   },
+  created: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model("employeeAttendance", attendanceModel);

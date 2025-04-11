@@ -25,6 +25,10 @@ const leaveGroupSchema = new Schema({
     type: String,
     required: [true, "status not provided"],
   },
+  created: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model("LeaveGroup", leaveGroupSchema);

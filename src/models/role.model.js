@@ -27,6 +27,10 @@ const userRoleSchema = new Schema({
     required: true,
     default: {},
   },
+  created: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model("UserRole", userRoleSchema);

@@ -21,6 +21,10 @@ const settingSchema = new Schema({
   ipRestriction: {
     type: String,
   },
+  created: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model("Setting", settingSchema);
