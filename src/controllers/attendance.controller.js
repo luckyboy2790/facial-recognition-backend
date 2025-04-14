@@ -350,6 +350,12 @@ exports.updateAttendance = async (req, res) => {
       });
     }
 
+    if (existAttendance.time_out !== "" || existAttendance.time_out) {
+      return res.status(500).json({
+        message: "This employee has already left work.",
+      });
+    }
+
     const { employee, date, time_in, time_out, reason, break_in, break_out } =
       req.body;
 
@@ -718,10 +724,33 @@ exports.recordBreakTime = async (req, res) => {
 
     if (
       (existAttendance.break_in || existAttendance.break_in !== "") &&
-      (existAttendance.break_out || existAttendance.break_out !== "")
+      (existAttendance.break_out || existAttendance.break_out !== "") &&
+      (break_in || break_in !== "" || break_out || break_out !== "")
     ) {
       return res.status(404).json({
         message: "This employee has already taken a break.",
+      });
+    }
+
+    if (
+      (!existAttendance.break_in || existAttendance.break_in === "") &&
+      (!existAttendance.break_out || existAttendance.break_out === "") &&
+      (!existAttendance.time_out || existAttendance.time_out === "") &&
+      (!break_in || break_in === "")
+    ) {
+      return res.status(500).json({
+        message: "This employee didn't start break.",
+      });
+    }
+
+    if (
+      (existAttendance.break_in || existAttendance.break_in !== "") &&
+      (!existAttendance.break_out || existAttendance.break_out === "") &&
+      (break_in || break_in !== "") &&
+      (!break_out || break_out === "")
+    ) {
+      return res.status(500).json({
+        message: "This employee is taking a break.",
       });
     }
 
