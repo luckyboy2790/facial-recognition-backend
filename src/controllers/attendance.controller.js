@@ -14,12 +14,15 @@ exports.createAttendance = async (req, res) => {
     if (time_in === "") {
       return res.status(500).json({
         message: `You have to input time in.`,
+        translationKey: "empty_time_in",
       });
     }
 
     if (existEmployee) {
       return res.status(400).json({
-        message: `The employee already clocked in today at ${existEmployee.time_in}`,
+        message: `The employee already clocked in today at {{time_in}}`,
+        time_in: existEmployee.time_in,
+        translationKey: "employee_clocked_in",
       });
     }
 
@@ -33,6 +36,7 @@ exports.createAttendance = async (req, res) => {
     if (!employeeSchedule) {
       return res.status(400).json({
         message: "No active schedule found for this employee.",
+        translationKey: "no_schedule",
       });
     }
 
@@ -43,12 +47,15 @@ exports.createAttendance = async (req, res) => {
     if (rest_days.includes(date)) {
       return res.status(400).json({
         message: "Today is a rest day for this employee.",
+        translationKey: "today_rest_day",
       });
     }
 
     if (rest_days.includes(dayName)) {
       return res.status(400).json({
-        message: `This day (${dayName}) is a rest day for this employee.`,
+        message: `This day ({{time_in}}) is a rest day for this employee.`,
+        time_in: dayName,
+        translationKey: "rest_day",
       });
     }
 
@@ -362,6 +369,7 @@ exports.updateAttendance = async (req, res) => {
     if (time_in === "") {
       return res.status(500).json({
         message: `You have to input time in.`,
+        translationKey: "empty_time_in",
       });
     }
 
@@ -375,6 +383,7 @@ exports.updateAttendance = async (req, res) => {
     if (!employeeSchedule) {
       return res.status(400).json({
         message: "No active schedule found for this employee.",
+        translationKey: "no_schedule",
       });
     }
 
@@ -385,12 +394,15 @@ exports.updateAttendance = async (req, res) => {
     if (rest_days.includes(date)) {
       return res.status(400).json({
         message: "Today is a rest day for this employee.",
+        translationKey: "today_rest_day",
       });
     }
 
     if (rest_days.includes(dayName)) {
       return res.status(400).json({
-        message: `This day (${dayName}) is a rest day for this employee.`,
+        message: `This day ({{time_in}}) is a rest day for this employee.`,
+        time_in: dayName,
+        translationKey: "rest_day",
       });
     }
 
@@ -530,7 +542,10 @@ exports.checkOutAttendance = async (req, res) => {
     if (!attendanceData || attendanceData?.length <= 0) {
       return res
         .status(400)
-        .send({ message: "There is no attendance data for this employee." });
+        .send({
+          message: "There is no attendance data for this employee.",
+          translationKey: "no_attendance",
+        });
     }
 
     res.status(200).send(attendanceData);
@@ -713,12 +728,14 @@ exports.recordBreakTime = async (req, res) => {
     if (!existAttendance) {
       return res.status(404).json({
         message: "There is no attendance data for this employee.",
+        translationKey: "no_attendance",
       });
     }
 
     if (existAttendance.time_out || existAttendance.time_out !== "") {
       return res.status(404).json({
         message: "This employee has already left work.",
+        translationKey: "left_work",
       });
     }
 
@@ -729,6 +746,7 @@ exports.recordBreakTime = async (req, res) => {
     ) {
       return res.status(404).json({
         message: "This employee has already taken a break.",
+        translationKey: "taken_break",
       });
     }
 
@@ -740,6 +758,7 @@ exports.recordBreakTime = async (req, res) => {
     ) {
       return res.status(500).json({
         message: "This employee didn't start break.",
+        translationKey: "no_start_break",
       });
     }
 
@@ -751,12 +770,14 @@ exports.recordBreakTime = async (req, res) => {
     ) {
       return res.status(500).json({
         message: "This employee is taking a break.",
+        translationKey: "taking_break",
       });
     }
 
     if (existAttendance.break_out || existAttendance.break_out !== "") {
       return res.status(404).json({
         message: "This employee has already finished his break.",
+        translationKey: "finish_break",
       });
     }
 
@@ -770,6 +791,7 @@ exports.recordBreakTime = async (req, res) => {
     if (!employeeSchedule) {
       return res.status(400).json({
         message: "No active schedule found for this employee.",
+        translationKey: "no_schedule",
       });
     }
 
