@@ -354,12 +354,14 @@ exports.updateAttendance = async (req, res) => {
     if (!existAttendance) {
       return res.status(404).json({
         message: "There is no attendance data for this employee.",
+        translationKey: "no_attendance",
       });
     }
 
     if (existAttendance.time_out !== "" || existAttendance.time_out) {
       return res.status(500).json({
         message: "This employee has already left work.",
+        translationKey: "left_work",
       });
     }
 
@@ -540,12 +542,10 @@ exports.checkOutAttendance = async (req, res) => {
     });
 
     if (!attendanceData || attendanceData?.length <= 0) {
-      return res
-        .status(400)
-        .send({
-          message: "There is no attendance data for this employee.",
-          translationKey: "no_attendance",
-        });
+      return res.status(400).send({
+        message: "There is no attendance data for this employee.",
+        translationKey: "no_attendance",
+      });
     }
 
     res.status(200).send(attendanceData);
